@@ -1,0 +1,8 @@
+_pycache_
+build
+dist
+node
+dist.zip
+node.zip
+*.spec
+*.pyc*

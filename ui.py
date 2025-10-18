@@ -15,6 +15,16 @@ class WinGUI(Tk):
         self.tk_label_mgvyirxi = self.__tk_label_mgvyirxi( self.tk_tabs_mgvyhx7m_1)
         self.tk_label_mgvyj0z2 = self.__tk_label_mgvyj0z2( self.tk_tabs_mgvyhx7m_0)
         self.tk_button_add_log = self.__tk_button_add_log( self.tk_tabs_mgvyhx7m_0)
+        self.tk_label_mgvzee33 = self.__tk_label_mgvzee33( self.tk_tabs_mgvyhx7m_2)
+        self.tk_input_mgvzhkmd = self.__tk_input_mgvzhkmd( self.tk_tabs_mgvyhx7m_2)
+        self.tk_label_mgvziu6f = self.__tk_label_mgvziu6f( self.tk_tabs_mgvyhx7m_2)
+        self.tk_label_mgvzjoa0 = self.__tk_label_mgvzjoa0( self.tk_tabs_mgvyhx7m_2)
+        self.tk_input_mgvzjrmb = self.__tk_input_mgvzjrmb( self.tk_tabs_mgvyhx7m_2)
+        self.tk_input_mgvzlaea = self.__tk_input_mgvzlaea( self.tk_tabs_mgvyhx7m_2)
+        self.tk_button_saveConfBtn = self.__tk_button_saveConfBtn( self.tk_tabs_mgvyhx7m_2)
+        self.tk_button_testConfBtn = self.__tk_button_testConfBtn( self.tk_tabs_mgvyhx7m_2)
+        self.tk_select_box_mgvzrepy = self.__tk_select_box_mgvzrepy( self.tk_tabs_mgvyhx7m_2)
+        self.tk_label_mgvzruld = self.__tk_label_mgvzruld( self.tk_tabs_mgvyhx7m_2)
         self.tk_frame_mgvyqw0h = self.__tk_frame_mgvyqw0h(self)
         self.tk_text_main_log = self.__tk_text_main_log( self.tk_frame_mgvyqw0h) 
     def __win(self):
@@ -68,6 +78,10 @@ class WinGUI(Tk):
         frame.add(self.tk_tabs_mgvyhx7m_0, text="主页")
         self.tk_tabs_mgvyhx7m_1 = self.__tk_frame_mgvyhx7m_1(frame)
         frame.add(self.tk_tabs_mgvyhx7m_1, text="日志")
+        self.tk_tabs_mgvyhx7m_2 = self.__tk_frame_mgvyhx7m_2(frame)
+        frame.add(self.tk_tabs_mgvyhx7m_2, text="设置")
+        self.tk_tabs_mgvyhx7m_3 = self.__tk_frame_mgvyhx7m_3(frame)
+        frame.add(self.tk_tabs_mgvyhx7m_3, text="关于")
         frame.place(x=0, y=0, width=681, height=187)
         return frame
     def __tk_frame_mgvyhx7m_0(self,parent):
@@ -75,6 +89,14 @@ class WinGUI(Tk):
         frame.place(x=0, y=0, width=681, height=187)
         return frame
     def __tk_frame_mgvyhx7m_1(self,parent):
+        frame = Frame(parent)
+        frame.place(x=0, y=0, width=681, height=187)
+        return frame
+    def __tk_frame_mgvyhx7m_2(self,parent):
+        frame = Frame(parent)
+        frame.place(x=0, y=0, width=681, height=187)
+        return frame
+    def __tk_frame_mgvyhx7m_3(self,parent):
         frame = Frame(parent)
         frame.place(x=0, y=0, width=681, height=187)
         return frame
@@ -90,6 +112,47 @@ class WinGUI(Tk):
         btn = Button(parent, text="按钮", takefocus=False,)
         btn.place(x=160, y=30, width=50, height=30)
         return btn
+    def __tk_label_mgvzee33(self,parent):
+        label = Label(parent,text="AccessKey",anchor="center", )
+        label.place(x=19, y=16, width=80, height=30)
+        return label
+    def __tk_input_mgvzhkmd(self,parent):
+        ipt = Entry(parent, )
+        ipt.place(x=118, y=16, width=200, height=30)
+        return ipt
+    def __tk_label_mgvziu6f(self,parent):
+        label = Label(parent,text="FileKey",anchor="center", )
+        label.place(x=19, y=75, width=80, height=30)
+        return label
+    def __tk_label_mgvzjoa0(self,parent):
+        label = Label(parent,text="SecretKey",anchor="center", )
+        label.place(x=358, y=16, width=80, height=30)
+        return label
+    def __tk_input_mgvzjrmb(self,parent):
+        ipt = Entry(parent, )
+        ipt.place(x=459, y=16, width=200, height=30)
+        return ipt
+    def __tk_input_mgvzlaea(self,parent):
+        ipt = Entry(parent, )
+        ipt.place(x=118, y=76, width=200, height=30)
+        return ipt
+    def __tk_button_saveConfBtn(self,parent):
+        btn = Button(parent, text="保存", takefocus=False,)
+        btn.place(x=608, y=123, width=50, height=30)
+        return btn
+    def __tk_button_testConfBtn(self,parent):
+        btn = Button(parent, text="测试", takefocus=False,)
+        btn.place(x=528, y=124, width=50, height=30)
+        return btn
+    def __tk_select_box_mgvzrepy(self,parent):
+        cb = Combobox(parent, state="readonly", )
+        cb['values'] = ("每次启动时检查","从不检查更新")
+        cb.place(x=459, y=76, width=200, height=30)
+        return cb
+    def __tk_label_mgvzruld(self,parent):
+        label = Label(parent,text="更新频率",anchor="center", )
+        label.place(x=360, y=75, width=78, height=30)
+        return label
     def __tk_frame_mgvyqw0h(self,parent):
         frame = Frame(parent,)
         frame.place(x=0, y=197, width=681, height=251)
@@ -108,6 +171,8 @@ class Win(WinGUI):
         self.ctl.init(self)
     def __event_bind(self):
         self.tk_button_add_log.bind('<Button-1>',self.ctl.add_log_handle)
+        self.tk_button_saveConfBtn.bind('<Button-1>',self.ctl.saveConfHandle)
+        self.tk_button_testConfBtn.bind('<Button-1>',self.ctl.testConfHandle)
         pass
     def __style_config(self):
         pass

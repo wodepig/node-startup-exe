@@ -6,3 +6,4 @@ dist.zip
 node.zip
 *.spec
 *.pyc*
+config.json

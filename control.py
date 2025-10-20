@@ -26,17 +26,39 @@ class Controller:
         self.ui.tk_text_main_log.insert("end",f"{get_current_hms()} {msg}\n")
         # 自动滚动到文本框底部
         self.ui.tk_text_main_log.see("end")
-    # 创建日志处理函数，适配工具类
     def log_handler(msg):
-            self.add_log_handle(evt, msg)
-    def saveConfHandle(self,evt):
+        self.add_log_handle(evt, msg)
+    def change_update_type(self,evt):
+        """
+        处理升级类型选择框选择事件
+        """
+        if evt.widget.get() == 'UpgradeLin':
+            print('UpgradeLin')
+            self.ui.tk_frame_ul_confg_dialog.pack()
+            self.ui.tk_frame_fix_config_dialog.pack_forget()
+            self.ui.tk_frame_url_config_dialog.pack_forget()
+        elif evt.widget.get() == '固定链接':
+            self.ui.tk_frame_ul_confg_dialog.config(state='disabled')
+            self.ui.tk_frame_fix_config_dialog.config(state='normal')
+            self.ui.tk_frame_url_config_dialog.config(state='disabled')
+        elif evt.widget.get() == '固定url':
+            self.ui.tk_frame_ul_confg_dialog.config(state='disabled')
+            self.ui.tk_frame_fix_config_dialog.config(state='disabled')
+            self.ui.tk_frame_url_config_dialog.config(state='normal')
+        else:
+            self.ui.tk_frame_ul_confg_dialog.config(state='disabled')
+            self.ui.tk_frame_fix_config_dialog.config(state='disabled')
+            self.ui.tk_frame_url_config_dialog.config(state='disabled')
+        # print(evt)
+        # print(evt.widget.get())
+        # self.ui.tk_select_box_update_type.get()
+        # print("<<ComboboxSelected>>事件未处理:",evt)
+    def check_conf_btn_handle(self,evt):
+        print("<Button-1>事件未处理:",evt)
+    def save_conf_btn_handle(self,evt):
         """
         处理保存配置按钮点击事件
         """
-        format_upgrade_link('888', log_handler)
-        print("<Button-1>事件未处理:",evt)
-    def testConfHandle(self,evt):
-        """
-        处理测试配置按钮点击事件
-        """
+        format_upgrade_link('888', self.add_log_handle(evt, msg='888'))
+        self.ui.tk_ak
         print("<Button-1>事件未处理:",evt)

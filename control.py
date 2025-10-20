@@ -33,26 +33,21 @@ class Controller:
         处理升级类型选择框选择事件
         """
         if evt.widget.get() == 'UpgradeLin':
-            print('UpgradeLin')
-            self.ui.tk_frame_ul_confg_dialog.pack()
-            self.ui.tk_frame_fix_config_dialog.pack_forget()
-            self.ui.tk_frame_url_config_dialog.pack_forget()
+            self.ui.tk_frame_ul_confg_dialog.place(x=19, y=65, width=819, height=90)
+            self.ui.tk_frame_fix_config_dialog.place_forget()
+            self.ui.tk_frame_url_config_dialog.place_forget()
         elif evt.widget.get() == '固定链接':
-            self.ui.tk_frame_ul_confg_dialog.config(state='disabled')
-            self.ui.tk_frame_fix_config_dialog.config(state='normal')
-            self.ui.tk_frame_url_config_dialog.config(state='disabled')
+            self.ui.tk_frame_ul_confg_dialog.place_forget()
+            self.ui.tk_frame_fix_config_dialog.place(x=19, y=65, width=819, height=90)
+            self.ui.tk_frame_url_config_dialog.place_forget()
         elif evt.widget.get() == '固定url':
-            self.ui.tk_frame_ul_confg_dialog.config(state='disabled')
-            self.ui.tk_frame_fix_config_dialog.config(state='disabled')
-            self.ui.tk_frame_url_config_dialog.config(state='normal')
+            self.ui.tk_frame_ul_confg_dialog.place_forget()
+            self.ui.tk_frame_fix_config_dialog.place_forget()
+            self.ui.tk_frame_url_config_dialog.place(x=19, y=65, width=819, height=90)
         else:
-            self.ui.tk_frame_ul_confg_dialog.config(state='disabled')
-            self.ui.tk_frame_fix_config_dialog.config(state='disabled')
-            self.ui.tk_frame_url_config_dialog.config(state='disabled')
-        # print(evt)
-        # print(evt.widget.get())
-        # self.ui.tk_select_box_update_type.get()
-        # print("<<ComboboxSelected>>事件未处理:",evt)
+            self.ui.tk_frame_ul_confg_dialog.place_forget()
+            self.ui.tk_frame_fix_config_dialog.place_forget()
+            self.ui.tk_frame_url_config_dialog.place_forget()
     def check_conf_btn_handle(self,evt):
         print("<Button-1>事件未处理:",evt)
     def save_conf_btn_handle(self,evt):

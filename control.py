@@ -5,8 +5,8 @@ QQ交流群:905019785
 在线反馈:https://support.qq.com/product/618914
 """
 from ui import Win  
-from utils import get_current_hms
-from upgrade_link_utils import format_upgrade_link
+from utils.utils import get_current_hms
+from utils.upgrade_link_utils import check_config, format_upgrade_link
 # 示例下载 https://www.pytk.net/blog/1702564569.html
 class Controller:
     # 导入UI类后，替换以下的 object 类型，将获得 IDE 属性提示功能
@@ -19,11 +19,14 @@ class Controller:
         """
         self.ui = ui
         # TODO 组件初始化 赋值操作
-    def add_log_handle(self,evt,msg):
+    def add_log_handle(self, evt, msg, color='black'):
         """
         处理日志输出
         """
-        self.ui.tk_text_main_log.insert("end",f"{get_current_hms()} {msg}\n")
+        # 为文本框添加标签配置，设置文字颜色
+        bg_color = 'black' if color == 'yellow' else 'white'
+        self.ui.tk_text_main_log.tag_configure(color, foreground=color, background=bg_color)
+        self.ui.tk_text_main_log.insert("end", f"{get_current_hms()} {msg}\n", color)
         # 自动滚动到文本框底部
         self.ui.tk_text_main_log.see("end")
     def log_handler(msg):
@@ -49,7 +52,25 @@ class Controller:
             self.ui.tk_frame_fix_config_dialog.place_forget()
             self.ui.tk_frame_url_config_dialog.place_forget()
     def check_conf_btn_handle(self,evt):
-        print("<Button-1>事件未处理:",evt)
+        """
+        处理检查配置按钮点击事件
+        """
+        updateType = self.ui.tk_select_box_update_type.get()
+        if updateType == 'UpgradeLin':
+            ak = self.ui.tk_input_ul_ak.get()
+            sk = self.ui.tk_input_ul_sk.get()
+            fk = self.ui.tk_input_ul_filekey.get()
+            check_config(ak, sk, fk, self.add_log_handle)
+            # if check_config(ak, sk, fk, self.log_handler):
+            #     self.add_log_handle(evt, msg='配置检查通过',color='green')
+            # else:
+            #     self.add_log_handle(evt, msg='配置检查不通过',color='red')
+        elif updateType == '固定链接':
+            self.add_log_handle(evt, msg='暂未实现',color='yellow')
+        elif updateType == '固定url':
+            self.add_log_handle(evt, msg='暂未实现',color='yellow')
+        else:
+            self.add_log_handle(evt, msg='暂未实现',color='yellow')
     def save_conf_btn_handle(self,evt):
         """
         处理保存配置按钮点击事件

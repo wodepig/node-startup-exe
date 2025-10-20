@@ -1,3 +1,4 @@
+# http://upgrade.toolsetlink.com/的工具类
 def check_config(ak, sk, fk, log_handler=None):
     """
     检查配置是否完整
@@ -9,7 +10,7 @@ def check_config(ak, sk, fk, log_handler=None):
     """
     if not all([ak, sk, fk]):
         if log_handler:
-            log_handler("配置不完整，缺少访问密钥、密钥或fileKey")
+            log_handler(evt=None,msg="配置不完整，缺少访问密钥、密钥或fileKey", color='red')
         return False
     return True
     # 发请求测试
@@ -26,9 +27,9 @@ def format_upgrade_link(link, log_handler=None):
     try:
         result = link.replace("\\n", "\n")
         if log_handler:
-            log_handler(f"成功格式化升级链接: {link}")
+            log_handler(msg=f"成功格式化升级链接: {link}", color='green')
         return result
     except Exception as e:
         if log_handler:
-            log_handler(f"格式化升级链接时出错: {str(e)}")
+            log_handler(msg=f"格式化升级链接时出错: {str(e)}", color='red')
         raise

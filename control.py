@@ -6,7 +6,10 @@ QQ交流群:905019785
 """
 from ui import Win  
 from utils.utils import get_current_hms
-from utils.upgrade_link_utils import check_config, format_upgrade_link
+from utils.upgrade_link_utils import check_config, format_upgrade_link,get_new_version
+from utils.upgrade_utils import UpgradeLinkClient
+from ConfigManager import ConfigManager
+
 # 示例下载 https://www.pytk.net/blog/1702564569.html
 class Controller:
     # 导入UI类后，替换以下的 object 类型，将获得 IDE 属性提示功能
@@ -18,7 +21,23 @@ class Controller:
         得到UI实例，对组件进行初始化配置
         """
         self.ui = ui
+        self.initConfig()
         # TODO 组件初始化 赋值操作
+    def initConfig(self):
+        cfg = ConfigManager()
+        # 初始化更新类型
+        updateType = cfg.read('updateType','UpgradeLin')
+        updateTypeList = ['UpgradeLin','固定链接','固定url']
+        self.ui.tk_select_box_update_type.current(updateTypeList.index(updateType))
+        self.change_update_type(None)
+        # 初始化值
+        ulConf = cfg.read('ulConf',{})
+        self.ui.tk_input_ul_ak.insert(0,ulConf.get('ak',''))
+        self.ui.tk_input_ul_sk.insert(0,ulConf.get('sk',''))
+        self.ui.tk_input_ul_url.insert(0,ulConf.get('url',''))
+        self.ui.tk_input_ul_filekey.insert(0,ulConf.get('fileKey',''))
+        self.add_log_handle(None, "更新配置加载完成...")
+        # 加载系统信息
     def add_log_handle(self, evt, msg, color='black'):
         """
         处理日志输出
@@ -35,15 +54,20 @@ class Controller:
         """
         处理升级类型选择框选择事件
         """
-        if evt.widget.get() == 'UpgradeLin':
+        type = ''
+        if not evt:
+            type = self.ui.tk_select_box_update_type.get()
+        else:
+            type = evt.widget.get()
+        if type == 'UpgradeLin':
             self.ui.tk_frame_ul_confg_dialog.place(x=19, y=65, width=819, height=90)
             self.ui.tk_frame_fix_config_dialog.place_forget()
             self.ui.tk_frame_url_config_dialog.place_forget()
-        elif evt.widget.get() == '固定链接':
+        elif type == '固定链接':
             self.ui.tk_frame_ul_confg_dialog.place_forget()
             self.ui.tk_frame_fix_config_dialog.place(x=19, y=65, width=819, height=90)
             self.ui.tk_frame_url_config_dialog.place_forget()
-        elif evt.widget.get() == '固定url':
+        elif type == '固定url':
             self.ui.tk_frame_ul_confg_dialog.place_forget()
             self.ui.tk_frame_fix_config_dialog.place_forget()
             self.ui.tk_frame_url_config_dialog.place(x=19, y=65, width=819, height=90)
@@ -60,11 +84,12 @@ class Controller:
             ak = self.ui.tk_input_ul_ak.get()
             sk = self.ui.tk_input_ul_sk.get()
             fk = self.ui.tk_input_ul_filekey.get()
-            check_config(ak, sk, fk, self.add_log_handle)
-            # if check_config(ak, sk, fk, self.log_handler):
-            #     self.add_log_handle(evt, msg='配置检查通过',color='green')
-            # else:
-            #     self.add_log_handle(evt, msg='配置检查不通过',color='red')
+            client = UpgradeLinkClient(ak, sk, log_handler=self.add_log_handle)
+            resp = client.get_file_upgrade(fk)
+            if resp and (resp.code == 200 or resp.code == 0):
+                self.add_log_handle(evt, msg='配置检查成功',color='green')
+            else:
+                self.add_log_handle(evt, msg='配置检查失败',color='red')
         elif updateType == '固定链接':
             self.add_log_handle(evt, msg='暂未实现',color='yellow')
         elif updateType == '固定url':
@@ -75,6 +100,28 @@ class Controller:
         """
         处理保存配置按钮点击事件
         """
-        format_upgrade_link('888', self.add_log_handle(evt, msg='888'))
-        self.ui.tk_ak
-        print("<Button-1>事件未处理:",evt)
+        updateType = self.ui.tk_select_box_update_type.get()
+        if updateType == 'UpgradeLin':
+            ak = self.ui.tk_input_ul_ak.get()
+            sk = self.ui.tk_input_ul_sk.get()
+            fk = self.ui.tk_input_ul_filekey.get()
+            openUrl = self.ui.tk_input_ul_url.get()
+            client = UpgradeLinkClient(ak, sk, log_handler=self.add_log_handle)
+            resp = client.get_file_upgrade(fk)
+            if resp and (resp.code == 200 or resp.code == 0):
+                # 保存配置
+                cfg = ConfigManager()
+                cfg.write('ulConf.ak', ak)
+                cfg.write('ulConf.ak', ak)
+                cfg.write('ulConf.sk', sk)
+                cfg.write('ulConf.fileKey', fk)
+                cfg.write('updateType', 'UpgradeLin')
+                self.add_log_handle(evt, msg='配置保存成功',color='green')
+            else:
+                self.add_log_handle(evt, msg='配置保存失败',color='red')
+        elif updateType == '固定链接':
+            self.add_log_handle(evt, msg='暂未实现',color='yellow')
+        elif updateType == '固定url':
+            self.add_log_handle(evt, msg='暂未实现',color='yellow')
+        else:
+            self.add_log_handle(evt, msg='暂未实现',color='yellow')

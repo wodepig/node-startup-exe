@@ -31,6 +31,15 @@ class WinGUI(Tk):
         self.tk_frame_url_config_dialog = self.__tk_frame_url_config_dialog( self.tk_tabs_mgukgrl3_1)
         self.tk_label_mgyij1po = self.__tk_label_mgyij1po( self.tk_frame_url_config_dialog) 
         self.tk_input_url_url = self.__tk_input_url_url( self.tk_frame_url_config_dialog) 
+        self.tk_label_mgyxcy13 = self.__tk_label_mgyxcy13( self.tk_tabs_mgukgrl3_0)
+        self.tk_label_mgyxd8r2 = self.__tk_label_mgyxd8r2( self.tk_tabs_mgukgrl3_0)
+        self.tk_label_mgyxdd6i = self.__tk_label_mgyxdd6i( self.tk_tabs_mgukgrl3_0)
+        self.tk_input_sys_version = self.__tk_input_sys_version( self.tk_tabs_mgukgrl3_0)
+        self.tk_input_sys_user = self.__tk_input_sys_user( self.tk_tabs_mgukgrl3_0)
+        self.tk_input_app_version = self.__tk_input_app_version( self.tk_tabs_mgukgrl3_0)
+        self.tk_button_update_btn = self.__tk_button_update_btn( self.tk_tabs_mgukgrl3_0)
+        self.tk_button_stop_btn = self.__tk_button_stop_btn( self.tk_tabs_mgukgrl3_0)
+        self.tk_button_start_btn = self.__tk_button_start_btn( self.tk_tabs_mgukgrl3_0)
         self.tk_frame_mgyh9kz6 = self.__tk_frame_mgyh9kz6(self)
         self.tk_text_main_log = self.__tk_text_main_log( self.tk_frame_mgyh9kz6) 
     def __win(self):
@@ -171,6 +180,42 @@ class WinGUI(Tk):
         ipt = Entry(parent, )
         ipt.place(x=77, y=0, width=180, height=30)
         return ipt
+    def __tk_label_mgyxcy13(self,parent):
+        label = Label(parent,text="系统版本",anchor="center", )
+        label.place(x=23, y=15, width=80, height=30)
+        return label
+    def __tk_label_mgyxd8r2(self,parent):
+        label = Label(parent,text="系统用户",anchor="center", )
+        label.place(x=23, y=69, width=80, height=30)
+        return label
+    def __tk_label_mgyxdd6i(self,parent):
+        label = Label(parent,text="应用版本",anchor="center", )
+        label.place(x=23, y=126, width=80, height=30)
+        return label
+    def __tk_input_sys_version(self,parent):
+        ipt = Entry(parent,)
+        ipt.place(x=119, y=15, width=150, height=30)
+        return ipt
+    def __tk_input_sys_user(self,parent):
+        ipt = Entry(parent, )
+        ipt.place(x=119, y=69, width=150, height=30)
+        return ipt
+    def __tk_input_app_version(self,parent):
+        ipt = Entry(parent, )
+        ipt.place(x=118, y=126, width=150, height=30)
+        return ipt
+    def __tk_button_update_btn(self,parent):
+        btn = Button(parent, text="检查更新", takefocus=False,)
+        btn.place(x=472, y=14, width=90, height=90)
+        return btn
+    def __tk_button_stop_btn(self,parent):
+        btn = Button(parent, text="停止", takefocus=False,)
+        btn.place(x=713, y=14, width=90, height=90)
+        return btn
+    def __tk_button_start_btn(self,parent):
+        btn = Button(parent, text="启动", takefocus=False,)
+        btn.place(x=592, y=14, width=90, height=90)
+        return btn
     def __tk_frame_mgyh9kz6(self,parent):
         frame = Frame(parent,)
         frame.place(x=0, y=266, width=848, height=373)
@@ -191,6 +236,9 @@ class Win(WinGUI):
         self.tk_select_box_update_type.bind('<<ComboboxSelected>>',self.ctl.change_update_type)
         self.tk_button_check_conf_btn.bind('<Button-1>',self.ctl.check_conf_btn_handle)
         self.tk_button_save_conf_btn.bind('<Button-1>',self.ctl.save_conf_btn_handle)
+        self.tk_button_update_btn.bind('<Button-1>',self.ctl.update_btn_handle)
+        self.tk_button_stop_btn.bind('<Button-1>',self.ctl.stop_btn_handle)
+        self.tk_button_start_btn.bind('<Button-1>',self.ctl.start_btn_handle)
         pass
     def __style_config(self):
         pass

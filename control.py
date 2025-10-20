@@ -5,7 +5,7 @@ QQ交流群:905019785
 在线反馈:https://support.qq.com/product/618914
 """
 from ui import Win  
-from utils.utils import get_current_hms
+from utils.utils import get_current_hms,get_system_architecture,get_system_login_user
 from utils.upgrade_link_utils import check_config, format_upgrade_link,get_new_version
 from utils.upgrade_utils import UpgradeLinkClient
 from ConfigManager import ConfigManager
@@ -38,6 +38,13 @@ class Controller:
         self.ui.tk_input_ul_filekey.insert(0,ulConf.get('fileKey',''))
         self.add_log_handle(None, "更新配置加载完成...")
         # 加载系统信息
+        self.ui.tk_input_sys_version.insert(0,get_system_architecture())
+        self.ui.tk_input_sys_version.config(state='readonly')
+        self.ui.tk_input_sys_user.insert(0,get_system_login_user())
+        self.ui.tk_input_sys_user.config(state='readonly')
+        self.ui.tk_input_app_version.insert(0,cfg.read('appVersion',''))
+        self.ui.tk_input_app_version.config(state='readonly')
+        self.add_log_handle(None, "系统信息加载完成...")
     def add_log_handle(self, evt, msg, color='black'):
         """
         处理日志输出
@@ -125,3 +132,15 @@ class Controller:
             self.add_log_handle(evt, msg='暂未实现',color='yellow')
         else:
             self.add_log_handle(evt, msg='暂未实现',color='yellow')
+    def node_btn_handle(self,evt):
+        print("<Button-1>事件未处理:",evt)
+    def dist_btn_handle(self,evt):
+        print("<Button-1>事件未处理:",evt)
+    def update_btn_handle(self,evt):
+        print("<Button-1>事件未处理:",evt)
+    def start_btn_handle(self,evt):
+        print("<Button-1>事件未处理:",evt)
+    def stop_btn_handle(self,evt):
+        print("<Button-1>事件未处理:",evt)
+    def open_brower_btn_handle(self,evt):
+        print("<Button-1>事件未处理:",evt)

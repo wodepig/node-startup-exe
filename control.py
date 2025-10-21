@@ -4,7 +4,12 @@
 QQ交流群:905019785
 在线反馈:https://support.qq.com/product/618914
 """
+from ast import For
 from ui import Win  
+import time
+import sys
+from pathlib import Path
+from utils.file_utils import get_project_root,check_file_exist,down_file
 from utils.utils import get_current_hms,get_system_architecture,get_system_login_user
 from utils.upgrade_link_utils import check_config, format_upgrade_link,get_new_version
 from utils.upgrade_utils import UpgradeLinkClient
@@ -15,13 +20,15 @@ class Controller:
     # 导入UI类后，替换以下的 object 类型，将获得 IDE 属性提示功能
     ui: Win
     def __init__(self):
-        pass
+        self.current_dir = Path(sys.argv[0]).parent.resolve()
     def init(self, ui):
         """
         得到UI实例，对组件进行初始化配置
         """
         self.ui = ui
         self.initConfig()
+        # 隐藏下载信息
+        self.ui.tk_frame_down_frame.place_forget()
         # TODO 组件初始化 赋值操作
     def initConfig(self):
         cfg = ConfigManager()
@@ -137,8 +144,31 @@ class Controller:
     def dist_btn_handle(self,evt):
         print("<Button-1>事件未处理:",evt)
     def update_btn_handle(self,evt):
+        self.ui.tk_button_update_btn.config(state='disabled')
+        cfg = ConfigManager()
+        appVersion = cfg.read("appVersion",0)
+        if appVersion == 0:
+            self.add_log_handle(evt, msg='初始化下载源程序...')
+            downUrl = "https://api.upgrade.toolsetlink.com/v1/file/download?fileKey="+ cfg.read("ulConf.fileKey",0)
+            down_file(downUrl,'dist.zip')
+        else:
+            self.add_log_handle(evt, msg='检查更新...')
+        # 判断是否后dist.zip文件
+        print(get_project_root())
+        print(check_file_exist('dist.zip'))
+        # if not os.path.exists('dist.zip'):
+        #     self.add_log_handle(evt, msg='请先打包dist.zip文件',color='red')
+        #     return
         print("<Button-1>事件未处理:",evt)
     def start_btn_handle(self,evt):
+        self.ui.tk_frame_down_frame.place(x=514, y=196, width=332, height=42)
+        time.sleep(1)
+        for i in range(20):
+            print(f"倒计时 {20-i} 秒")
+            self.ui.tk_progressbar_down_progress['value'] = i*5
+            self.ui.tk_label_down_label.config(text=f"倒计时 {20-i} 秒")
+            time.sleep(1)
+        print("20秒倒计时结束")
         print("<Button-1>事件未处理:",evt)
     def stop_btn_handle(self,evt):
         print("<Button-1>事件未处理:",evt)

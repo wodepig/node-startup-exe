@@ -40,6 +40,9 @@ class WinGUI(Tk):
         self.tk_button_update_btn = self.__tk_button_update_btn( self.tk_tabs_mgukgrl3_0)
         self.tk_button_stop_btn = self.__tk_button_stop_btn( self.tk_tabs_mgukgrl3_0)
         self.tk_button_start_btn = self.__tk_button_start_btn( self.tk_tabs_mgukgrl3_0)
+        self.tk_frame_down_frame = self.__tk_frame_down_frame( self.tk_tabs_mgukgrl3_0)
+        self.tk_label_down_label = self.__tk_label_down_label( self.tk_frame_down_frame) 
+        self.tk_progressbar_down_progress = self.__tk_progressbar_down_progress( self.tk_frame_down_frame) 
         self.tk_frame_mgyh9kz6 = self.__tk_frame_mgyh9kz6(self)
         self.tk_text_main_log = self.__tk_text_main_log( self.tk_frame_mgyh9kz6) 
     def __win(self):
@@ -193,7 +196,7 @@ class WinGUI(Tk):
         label.place(x=23, y=126, width=80, height=30)
         return label
     def __tk_input_sys_version(self,parent):
-        ipt = Entry(parent,)
+        ipt = Entry(parent, )
         ipt.place(x=119, y=15, width=150, height=30)
         return ipt
     def __tk_input_sys_user(self,parent):
@@ -216,6 +219,18 @@ class WinGUI(Tk):
         btn = Button(parent, text="启动", takefocus=False,)
         btn.place(x=592, y=14, width=90, height=90)
         return btn
+    def __tk_frame_down_frame(self,parent):
+        frame = Frame(parent,)
+        frame.place(x=514, y=196, width=332, height=42)
+        return frame
+    def __tk_label_down_label(self,parent):
+        label = Label(parent,text="下载进度:90%",anchor="center", )
+        label.place(x=67, y=9, width=80, height=30)
+        return label
+    def __tk_progressbar_down_progress(self,parent):
+        progressbar = Progressbar(parent, orient=HORIZONTAL,)
+        progressbar.place(x=152, y=18, width=180, height=14)
+        return progressbar
     def __tk_frame_mgyh9kz6(self,parent):
         frame = Frame(parent,)
         frame.place(x=0, y=266, width=848, height=373)

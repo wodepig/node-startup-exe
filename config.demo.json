@@ -1,0 +1,10 @@
+{
+    "updateType":"UpgradeLin,固定链接,固定url",
+    "ulConf":{
+        "ak":"UpgradeLin的ak",
+        "sk":"UpgradeLin的sk",
+        "fileKey":"UpgradeLin的fileKey",
+        "url":"http://localhost:3000"
+    },
+    "appVersion":"1/2/3,UpgradeLin检查更新需要用到"
+}

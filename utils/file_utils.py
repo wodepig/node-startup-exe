@@ -1,5 +1,6 @@
 import os
 import sys
+import requests
 from pathlib import Path
 def handle_dist_zip(url):
     pass
@@ -23,8 +24,8 @@ def down_file(url,file_name,progress_callback=None, progress_update_callback=Non
         downloaded_size = 0
         
         if progress_callback:
-            progress_callback(f"开始下载: {os.path.basename(save_path)}")
-            progress_callback(f"文件大小: {total_size / (1024*1024):.2f} MB")
+            progress_callback(evt=None,msg=f"开始下载: {os.path.basename(save_path)}")
+            progress_callback(evt=None,msg=f"文件大小: {total_size / (1024*1024):.2f} MB")
         
         with open(save_path, 'wb') as file:
             for chunk in response.iter_content(chunk_size=block_size):
@@ -38,14 +39,14 @@ def down_file(url,file_name,progress_callback=None, progress_update_callback=Non
                             progress_update_callback(progress, downloaded_size, total_size)
         
         if progress_callback:
-            progress_callback(f"下载完成: {os.path.basename(save_path)}")
+            progress_callback(evt=None,msg=f"下载完成: {os.path.basename(save_path)}")
         if progress_update_callback:
             progress_update_callback(100, total_size, total_size)
         
         return True
     except Exception as e:
         if progress_callback:
-            progress_callback(f"下载失败: {str(e)}")
+            progress_callback(evt=None,msg=f"下载失败: {str(e)}",color="red")
         return False
 def check_file_exist(file_name):
     """检查文件是否存在,可传文件名或目录名"""

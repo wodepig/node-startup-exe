@@ -224,8 +224,8 @@ class WinGUI(Tk):
         frame.place(x=514, y=196, width=332, height=42)
         return frame
     def __tk_label_down_label(self,parent):
-        label = Label(parent,text="下载进度:90%",anchor="center", )
-        label.place(x=67, y=9, width=80, height=30)
+        label = Label(parent,text="下载进度:0%",anchor="center", )
+        label.place(x=48, y=9, width=100, height=30)
         return label
     def __tk_progressbar_down_progress(self,parent):
         progressbar = Progressbar(parent, orient=HORIZONTAL,)

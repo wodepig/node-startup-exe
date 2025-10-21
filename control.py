@@ -139,6 +139,12 @@ class Controller:
             self.add_log_handle(evt, msg='暂未实现',color='yellow')
         else:
             self.add_log_handle(evt, msg='暂未实现',color='yellow')
+    def update_progress(self, progress, downloaded, total):
+        """更新进度条显示"""
+        # 使用线程安全的方式更新UI
+        self.ui.tk_progressbar_down_progress['value'] = progress
+        label_text = (downloaded/total)*100
+        self.ui.tk_label_down_label.config(text=f"已下载 {label_text:.2f} %")
     def node_btn_handle(self,evt):
         print("<Button-1>事件未处理:",evt)
     def dist_btn_handle(self,evt):
@@ -150,7 +156,10 @@ class Controller:
         if appVersion == 0:
             self.add_log_handle(evt, msg='初始化下载源程序...')
             downUrl = "https://api.upgrade.toolsetlink.com/v1/file/download?fileKey="+ cfg.read("ulConf.fileKey",0)
-            down_file(downUrl,'dist.zip')
+            self._start_down(downUrl,"dist.zip")
+            # import threading
+            # download_thread = threading.Thread(target=self._start_down(downUrl,"dist.zip"), daemon=True)
+            # download_thread.start()
         else:
             self.add_log_handle(evt, msg='检查更新...')
         # 判断是否后dist.zip文件
@@ -161,15 +170,25 @@ class Controller:
         #     return
         print("<Button-1>事件未处理:",evt)
     def start_btn_handle(self,evt):
-        self.ui.tk_frame_down_frame.place(x=514, y=196, width=332, height=42)
-        time.sleep(1)
-        for i in range(20):
-            print(f"倒计时 {20-i} 秒")
-            self.ui.tk_progressbar_down_progress['value'] = i*5
-            self.ui.tk_label_down_label.config(text=f"倒计时 {20-i} 秒")
-            time.sleep(1)
-        print("20秒倒计时结束")
+
+
         print("<Button-1>事件未处理:",evt)
+    def _start_down(self,downUrl,fileName):
+        """启动下载线程"""
+        try:
+            # 显示下载进度框架
+            self.ui.tk_frame_down_frame.place(x=514, y=196, width=332, height=42)
+            # 创建下载线程
+            import threading
+            download_thread = threading.Thread(
+                target=down_file,
+                args=(downUrl, fileName,self.add_log_handle,self.update_progress),
+                daemon=True
+            )
+            download_thread.start()
+            self.add_log_handle(None, f"开始下载: {fileName}")
+        except Exception as e:
+            self.add_log_handle(None, f"下载失败: {str(e)}", color='red')
     def stop_btn_handle(self,evt):
         print("<Button-1>事件未处理:",evt)
     def open_brower_btn_handle(self,evt):

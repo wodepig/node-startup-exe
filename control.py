@@ -235,6 +235,7 @@ class Controller:
             )
             download_thread.start()
             download_thread.join()
+            self.ui.tk_frame_down_frame.place_forget()
             # self.add_log_handle(None, f"开始下载: {fileName}")
         except Exception as e:
             self.add_log_handle(None, f"下载失败: {str(e)}", color='red')

@@ -149,7 +149,10 @@ class Controller:
         print("<Button-1>事件未处理:",evt)
     def dist_btn_handle(self,evt):
         print("<Button-1>事件未处理:",evt)
-    def update_btn_handle(self,evt):
+    def _update_btn_handle(self,evt):
+        """
+        处理更新按钮点击事件
+        """
         self.ui.tk_button_update_btn.config(state='disabled')
         cfg = ConfigManager()
         appVersion = cfg.read("appVersion",0)
@@ -162,7 +165,8 @@ class Controller:
             self._start_down(downUrl,"dist.zip")
             file_utils.unzip_file('dist.zip','dist',self.add_log_handle)
             cfg.write('appVersion', 1)
-            self.ui.tk_input_app_version.insert(0, str(1))
+            self.change_app_version_text(1)
+            self.add_log_handle(evt, msg='程序初始化成功',color='green')
         else:
             self.add_log_handle(evt, msg='检查更新...')
             ak = cfg.read('ulConf.ak', '')
@@ -170,23 +174,48 @@ class Controller:
             fk = cfg.read('ulConf.fileKey', '')
             client = UpgradeLinkClient(ak, sk, log_handler=self.add_log_handle)
             resp = client.get_file_upgrade(fk, version_code=appVersion)
+            # print('resp.data.fileKey',resp.data.to_map()['file_key'])
+            appVersion = resp.data.to_map()['versionCode']
+            downPath = resp.data.to_map()['urlPath']
             if resp and resp.code == 200:
-                self.add_log_handle(evt, msg=f'发现新版本:{resp.data.versionCode}, 下载地址:{resp.data.urlPath}',color='green')
-                self._start_down(resp.data.urlPath,"dist.zip")
-                file_utils.unzip_file('dist.zip','dist',logHandle)
-                cfg.write('appVersion', resp.data.versionCode)
-                self.ui.tk_input_app_version.insert(0, str(resp.data.versionCode))
+                self.add_log_handle(evt, msg=f'发现新版本:{appVersion}, 下载地址:{downPath}',color='green')
+                self._start_down(downPath,"dist.zip")
+                file_utils.unzip_file('dist.zip','dist',self.add_log_handle)
+                cfg.write('appVersion', appVersion)
+                self.change_app_version_text(appVersion)
             elif resp and  resp.code == 0:
-                self.add_log_handle(evt, msg='没有新的版本')
+                self.add_log_handle(evt, msg='没有新的版本',color='green')
             else:
                 self.add_log_handle(evt, msg='新版本检查失败',color='red')
+        self.ui.tk_button_update_btn.config(state='active')
+    def change_app_version_text(self,appVersion):
+        """
+        改变应用版本号文本框内容
+        """
+        # 先取消只读状态，插入文本，再恢复只读状态
+        self.ui.tk_input_app_version.config(state='normal')
+        self.ui.tk_input_app_version.delete(0, 'end')  # 先清空原有内容
+        self.ui.tk_input_app_version.insert(0, str(appVersion))
+        self.ui.tk_input_app_version.config(state='readonly')
+    def update_btn_handle(self,evt):
+        if self.ui.tk_button_update_btn.state()[0] == 'disabled':
+            self.add_log_handle(evt, msg='请等待任务处理完成...',color='yellow')
+            return
+        import threading
+        download_thread = threading.Thread(
+                target=self._update_btn_handle,
+                args=(evt,),
+                daemon=True
+            )
+        download_thread.start()
+        # self._update_btn_handle(evt)
         # 判断是否后dist.zip文件
         # print(file_utils.get_project_root())
         # print(file_utils.check_file_exist('dist.zip'))
         # if not os.path.exists('dist.zip'):
         #     self.add_log_handle(evt, msg='请先打包dist.zip文件',color='red')
         #     return
-        self.add_log_handle(evt, msg='检查更新处理结束')
+        
         # print("检查更新处理结束:",evt)
     def start_btn_handle(self,evt):
 
@@ -205,7 +234,8 @@ class Controller:
                 daemon=True
             )
             download_thread.start()
-            self.add_log_handle(None, f"开始下载: {fileName}")
+            download_thread.join()
+            # self.add_log_handle(None, f"开始下载: {fileName}")
         except Exception as e:
             self.add_log_handle(None, f"下载失败: {str(e)}", color='red')
     def stop_btn_handle(self,evt):

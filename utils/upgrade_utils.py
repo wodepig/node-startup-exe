@@ -118,8 +118,8 @@ class UpgradeLinkClient():
                 print("err: ", err)
                 if self.log_handler:
                     self.log_handler(evt=None,msg=f"获取file应用升级内容失败: {err}", color='red')
-            else:
-                print("info: ", info)
+            # else:
+            #     print("info: ", info)
             return info
         except Exception as e:
             if self.log_handler:

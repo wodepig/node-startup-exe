@@ -1,13 +1,152 @@
 import os
 import sys
 import requests
+import zipfile
+import shutil
 from pathlib import Path
-def handle_dist_zip(url):
-    pass
-def handle_node_zip(url):
-    pass
-def handle_dist_zip(url):
-    pass
+def log_msg(msg,logHandle=None):
+    """打印日志
+    msg:日志内容
+    color:日志颜色
+    """
+    if color == "red":
+        print(f"\033[91m{msg}\033[0m")
+    elif color == "green":
+        print(f"\033[92m{msg}\033[0m")
+    else:
+        print(msg)
+def unzip_file(file,folder,logHandle=None):
+    """解压文件
+    file: 文件名
+    folder:解压到的目录(相对于项目根目录)
+    """
+    try:
+        if logHandle:
+            logHandle(evt=None,msg=f"开始解压: {file}")
+        import zipfile
+        zip_path = Path(get_project_root()) / file
+        extract_dir = Path(get_project_root()) / folder
+        if not check_file_exist(file):
+            if logHandle:
+                logHandle(evt=None,msg=f"文件不存在: {file}",color="red")
+            return False
+            # 检查zip文件是否有效
+        if not zipfile.is_zipfile(zip_path):
+            if logHandle:
+                logHandle(evt=None,msg=f"解压失败: 不是有效的zip文件 - {zip_path}",color="red")
+            return False
+        # 创建解压目录（如果不存在）
+        os.makedirs(extract_dir, exist_ok=True)
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            # 测试zip文件是否损坏
+            test_result = zip_ref.testzip()
+            if test_result is not None:
+                if logHandle:
+                    logHandle(evt=None,msg=f"解压失败: zip文件损坏 - {test_result}",color="red")
+                return False
+            
+            # 获取压缩包中的文件列表
+            file_list = zip_ref.namelist()
+            # 直接解压所有文件，不使用tqdm进度条
+            for fileTemp in file_list:
+                zip_ref.extract(fileTemp, extract_dir)
+        with zipfile.ZipFile(file, 'r') as zip_ref:
+            zip_ref.extractall(folder)
+        if logHandle:
+            logHandle(evt=None,msg=f"解压完成: {file}",color="green")
+        return True
+    except Exception as e:
+        print(e)
+        if logHandle:
+            logHandle(evt=None,msg=f"解压失败: {str(e)}",color="red")
+        return False
+def handle_dist_zip(logHandle=None):
+    """处理dist.zip文件"""
+    if not unzip_file('dist.zip','dist',logHandle):
+        return False
+def handle_node_zip(logHandle=None):
+    """处理node.zip文件"""
+    node_dir = Path(get_project_root()) / 'node' 
+    # 解压并处理node.zip（如果不存在）
+    if  os.path.exists(node_dir):
+        if logHandle:
+            logHandle(evt=None,msg="node目录已存在，无需处理",color="green")
+        return True
+    if not unzip_file('node.zip','node_tmp',logHandle):
+        return False
+    node_temp_dir = Path(get_project_root()) / 'node_tmp' 
+    node_version_dir = detect_node_version_dir(node_temp_dir)
+    if not node_version_dir:
+        if logHandle:
+            logHandle(evt=None,msg="无法识别node版本目录",color="red")
+        return False
+    # 将版本目录中的内容移动到最终的node目录
+    if not move_node_contents(node_temp_dir, node_dir, node_version_dir):
+        if logHandle:
+            logHandle(evt=None,msg="无法处理node文件",color="red")
+        return False
+
+def detect_node_version_dir(temp_dir):
+    """自动检测node压缩包解压后的版本目录"""
+    try:
+        # 获取临时目录中的所有项目
+        items = os.listdir(temp_dir)
+        
+        # 寻找看起来像node版本的目录
+        for item in items:
+            item_path = os.path.join(temp_dir, item)
+            if os.path.isdir(item_path) and item.startswith("node-v"):
+                return item
+        
+        # 如果没找到明显的版本目录，检查是否有直接包含node.exe的目录
+        for item in items:
+            item_path = os.path.join(temp_dir, item)
+            if os.path.isdir(item_path):
+                for root, _, files in os.walk(item_path):
+                    if "node.exe" in files:
+                        return item
+                
+        return None
+        
+    except Exception as e:
+        print(f"检测node目录时出错: {str(e)}")
+        return None
+def move_node_contents(temp_dir, target_dir, version_dir):
+    """将node版本文件夹中的内容移动到目标node文件夹"""
+    try:
+        # 构建完整的版本目录路径
+        version_path = os.path.join(temp_dir, version_dir)
+        
+        if not os.path.exists(version_path):
+            return False
+            
+        # 创建目标目录
+        os.makedirs(target_dir, exist_ok=True)
+        
+        # 获取所有项目
+        items = os.listdir(version_path)
+        # 移动版本目录中的所有内容到目标目录
+        for item in items:
+            source = os.path.join(version_path, item)
+            destination = os.path.join(target_dir, item)
+            
+            # 如果目标已存在则先删除
+            if os.path.exists(destination):
+                if os.path.isdir(destination):
+                    shutil.rmtree(destination)
+                else:
+                    os.remove(destination)
+            
+            # 移动文件或目录
+            shutil.move(source, destination)
+        
+        # 删除临时解压目录
+        shutil.rmtree(temp_dir)
+        return True
+        
+    except Exception as e:
+        print(f"移动node文件失败: {str(e)}")
+        return False
 
 def down_file(url,file_name,progress_callback=None, progress_update_callback=None):
     """下载文件

@@ -82,7 +82,7 @@ class UpgradeLinkClient():
         # log_handler(evt=None,msg=f"ak:{ak},sk:{sk},fk:{fk}", color='green')
         return True
     
-    def get_file_upgrade(self, fk):
+    def get_file_upgrade(self, fk, version_code=1):
         """获取file应用升级内容"""
         try:
             # 检查配置是否完整
@@ -93,7 +93,6 @@ class UpgradeLinkClient():
             client = Client(self.config)
             # 设置请求参数
             file_key = fk
-            version_code = 1
             appoint_version_code = 0
             dev_model_key = ""
             dev_key = ""

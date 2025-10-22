@@ -9,7 +9,7 @@ from ui import Win
 import time
 import sys
 from pathlib import Path
-from utils.file_utils import get_project_root,check_file_exist,down_file
+import utils.file_utils as file_utils
 from utils.utils import get_current_hms,get_system_architecture,get_system_login_user
 from utils.upgrade_link_utils import check_config, format_upgrade_link,get_new_version
 from utils.upgrade_utils import UpgradeLinkClient
@@ -155,20 +155,39 @@ class Controller:
         appVersion = cfg.read("appVersion",0)
         if appVersion == 0:
             self.add_log_handle(evt, msg='初始化下载源程序...')
+            if cfg.read("ulConf.fileKey",0) == 0: 
+                self.add_log_handle(evt, msg='程序配置有误, 请去"关于"页面联系管理员', color='red')
+                return
             downUrl = "https://api.upgrade.toolsetlink.com/v1/file/download?fileKey="+ cfg.read("ulConf.fileKey",0)
             self._start_down(downUrl,"dist.zip")
-            # import threading
-            # download_thread = threading.Thread(target=self._start_down(downUrl,"dist.zip"), daemon=True)
-            # download_thread.start()
+            file_utils.unzip_file('dist.zip','dist',self.add_log_handle)
+            cfg.write('appVersion', 1)
+            self.ui.tk_input_app_version.insert(0, str(1))
         else:
             self.add_log_handle(evt, msg='检查更新...')
+            ak = cfg.read('ulConf.ak', '')
+            sk = cfg.read('ulConf.sk', '')
+            fk = cfg.read('ulConf.fileKey', '')
+            client = UpgradeLinkClient(ak, sk, log_handler=self.add_log_handle)
+            resp = client.get_file_upgrade(fk, version_code=appVersion)
+            if resp and resp.code == 200:
+                self.add_log_handle(evt, msg=f'发现新版本:{resp.data.versionCode}, 下载地址:{resp.data.urlPath}',color='green')
+                self._start_down(resp.data.urlPath,"dist.zip")
+                file_utils.unzip_file('dist.zip','dist',logHandle)
+                cfg.write('appVersion', resp.data.versionCode)
+                self.ui.tk_input_app_version.insert(0, str(resp.data.versionCode))
+            elif resp and  resp.code == 0:
+                self.add_log_handle(evt, msg='没有新的版本')
+            else:
+                self.add_log_handle(evt, msg='新版本检查失败',color='red')
         # 判断是否后dist.zip文件
-        print(get_project_root())
-        print(check_file_exist('dist.zip'))
+        # print(file_utils.get_project_root())
+        # print(file_utils.check_file_exist('dist.zip'))
         # if not os.path.exists('dist.zip'):
         #     self.add_log_handle(evt, msg='请先打包dist.zip文件',color='red')
         #     return
-        print("<Button-1>事件未处理:",evt)
+        self.add_log_handle(evt, msg='检查更新处理结束')
+        # print("检查更新处理结束:",evt)
     def start_btn_handle(self,evt):
 
 
@@ -181,7 +200,7 @@ class Controller:
             # 创建下载线程
             import threading
             download_thread = threading.Thread(
-                target=down_file,
+                target=file_utils.down_file,
                 args=(downUrl, fileName,self.add_log_handle,self.update_progress),
                 daemon=True
             )
@@ -190,6 +209,7 @@ class Controller:
         except Exception as e:
             self.add_log_handle(None, f"下载失败: {str(e)}", color='red')
     def stop_btn_handle(self,evt):
+        file_utils.handle_node_zip(self.add_log_handle)
         print("<Button-1>事件未处理:",evt)
     def open_brower_btn_handle(self,evt):
         print("<Button-1>事件未处理:",evt)

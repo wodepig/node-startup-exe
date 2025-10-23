@@ -11,7 +11,7 @@ import subprocess
 import sys
 from pathlib import Path
 import utils.file_utils as file_utils
-from utils.utils import get_current_hms,get_system_architecture,get_system_login_user
+from utils.utils import get_port_from_url,get_current_hms,get_system_architecture,get_system_login_user
 from utils.upgrade_link_utils import check_config, format_upgrade_link,get_new_version
 from utils.upgrade_utils import UpgradeLinkClient
 from ConfigManager import ConfigManager
@@ -38,15 +38,34 @@ class Controller:
         cfg = ConfigManager()
         # 初始化更新类型
         updateType = cfg.read('updateType','UpgradeLin')
-        updateTypeList = ['UpgradeLin','固定链接','固定url']
+        updateTypeList = ['UpgradeLin','下载更新','打开网页']
         self.ui.tk_select_box_update_type.current(updateTypeList.index(updateType))
         self.change_update_type(None)
         # 初始化值
         ulConf = cfg.read('ulConf',{})
         self.ui.tk_input_ul_ak.insert(0,ulConf.get('ak',''))
         self.ui.tk_input_ul_sk.insert(0,ulConf.get('sk',''))
-        self.ui.tk_input_ul_url.insert(0,ulConf.get('url',''))
+        if  ulConf.get('url','') == '':
+            self.ui.tk_input_ul_url.insert(0,"http://localhost:3000")
+        else:
+            self.ui.tk_input_ul_url.insert(0,ulConf.get('url',''))
         self.ui.tk_input_ul_filekey.insert(0,ulConf.get('fileKey',''))
+        # 下载更新的配置
+        downConf = cfg.read('downConf',{})
+        if downConf.get('url','') == '':
+            self.ui.tk_input_down_url.insert(0,"http://localhost:3000")
+        else:
+            self.ui.tk_input_down_url.insert(0,downConf.get('url',''))
+        self.ui.tk_input_down_open_url.insert(0,downConf.get('openUrl',''))
+        updateTimeType = downConf.get('updateTime','每次启动时')
+        updateTimeTypeList = ['每次启动时','从不']
+        self.ui.tk_select_box_down_update_time.current(updateTimeTypeList.index(updateTimeType))
+        # 打开网页的配置
+        openConf = cfg.read('openConf',{})
+        if openConf.get('url','') == '':
+            self.ui.tk_input_url_url.insert(0,"http://localhost:3000")
+        else:
+            self.ui.tk_input_url_url.insert(0,openConf.get('url',''))
         self.add_log_handle(None, "更新配置加载完成...")
         # 加载系统信息
         self.ui.tk_input_sys_version.insert(0,get_system_architecture())
@@ -88,11 +107,12 @@ class Controller:
             self.ui.tk_frame_ul_confg_dialog.place(x=19, y=65, width=819, height=90)
             self.ui.tk_frame_fix_config_dialog.place_forget()
             self.ui.tk_frame_url_config_dialog.place_forget()
-        elif type == '固定链接':
+            # 设置默认值
+        elif type == '下载更新':
             self.ui.tk_frame_ul_confg_dialog.place_forget()
             self.ui.tk_frame_fix_config_dialog.place(x=19, y=65, width=819, height=90)
             self.ui.tk_frame_url_config_dialog.place_forget()
-        elif type == '固定url':
+        elif type == '打开网页':
             self.ui.tk_frame_ul_confg_dialog.place_forget()
             self.ui.tk_frame_fix_config_dialog.place_forget()
             self.ui.tk_frame_url_config_dialog.place(x=19, y=65, width=819, height=90)
@@ -113,14 +133,28 @@ class Controller:
             resp = client.get_file_upgrade(fk)
             if resp and (resp.code == 200 or resp.code == 0):
                 self.add_log_handle(evt, msg='配置检查成功',color='green')
+                return True
             else:
                 self.add_log_handle(evt, msg='配置检查失败',color='red')
-        elif updateType == '固定链接':
-            self.add_log_handle(evt, msg='暂未实现',color='yellow')
-        elif updateType == '固定url':
-            self.add_log_handle(evt, msg='暂未实现',color='yellow')
+                return False
+        elif updateType == '下载更新':
+            downUrl = self.ui.tk_input_down_url.get()
+            openUrl = self.ui.tk_input_down_open_url.get()
+            downType = self.ui.tk_select_box_down_update_time.get()
+            if not downUrl or not openUrl or not downType:
+                self.add_log_handle(evt, msg='请填写完整下载配置',color='red')
+                return False
+            self.add_log_handle(evt, msg='配置检查成功',color='green')
+        elif updateType == '打开网页':
+            openUrl = self.ui.tk_input_url_url.get()
+            if not openUrl:
+                self.add_log_handle(evt, msg='请填写完整',color='red')
+                return False
+            self.add_log_handle(evt, msg='配置检查成功',color='green')
         else:
             self.add_log_handle(evt, msg='暂未实现',color='yellow')
+            return False
+        return True
     def save_conf_btn_handle(self,evt):
         """
         处理保存配置按钮点击事件
@@ -141,13 +175,39 @@ class Controller:
                 cfg.write('ulConf.sk', sk)
                 cfg.write('ulConf.fileKey', fk)
                 cfg.write('updateType', 'UpgradeLin')
+                cfg.write('appConfig.url', openUrl)
+                cfg.write('appConfig.port', get_port_from_url(openUrl))
                 self.add_log_handle(evt, msg='配置保存成功',color='green')
             else:
                 self.add_log_handle(evt, msg='配置保存失败',color='red')
-        elif updateType == '固定链接':
-            self.add_log_handle(evt, msg='暂未实现',color='yellow')
-        elif updateType == '固定url':
-            self.add_log_handle(evt, msg='暂未实现',color='yellow')
+        elif updateType == '下载更新':
+            downUrl = self.ui.tk_input_down_url.get()
+            openUrl = self.ui.tk_input_down_open_url.get()
+            downType = self.ui.tk_select_box_down_update_time.get()
+            if not downUrl or not openUrl or not downType:
+                self.add_log_handle(evt, msg='请填写完整下载配置',color='red')
+                return False
+            # 保存配置
+            cfg = ConfigManager()
+            cfg.write('downConf.url', downUrl)
+            cfg.write('downConf.openUrl', openUrl)
+            cfg.write('downConf.updateTime', downType)
+            cfg.write('updateType', '下载更新')
+            cfg.write('appConfig.url', openUrl)
+            cfg.write('appConfig.port', get_port_from_url(openUrl))
+            self.add_log_handle(evt, msg='配置保存成功',color='green')
+        elif updateType == '打开网页':
+            openUrl = self.ui.tk_input_url_url.get()
+            if not openUrl:
+                self.add_log_handle(evt, msg='请填写完整',color='red')
+                return False
+            # 保存配置
+            cfg = ConfigManager()
+            cfg.write('openConf.url', openUrl)
+            cfg.write('updateType', '打开网页')
+            cfg.write('appConfig.url', openUrl)
+            cfg.write('appConfig.port', get_port_from_url(openUrl))
+            self.add_log_handle(evt, msg='配置保存成功',color='green')
         else:
             self.add_log_handle(evt, msg='暂未实现',color='yellow')
     def update_progress(self, progress, downloaded, total):
@@ -166,6 +226,10 @@ class Controller:
         """
         self.ui.tk_button_update_btn.config(state='disabled')
         cfg = ConfigManager()
+        if cfg.read("updateType",'') == '打开网页':
+            self.add_log_handle(evt, msg='无需更新源码, 跳过', color='yellow')
+            self.ui.tk_button_update_btn.config(state='active')
+            return
         appVersion = cfg.read("appVersion",0)
         if appVersion == 0 or not file_utils.check_file_exist('dist'):
             self.add_log_handle(evt, msg='初始化下载源程序...')
@@ -221,6 +285,10 @@ class Controller:
             )
         download_thread.start()
     def _handle_node_zip(self,evt):
+        cfg = ConfigManager()
+        if cfg.read("updateType",'') == '打开网页':
+            self.add_log_handle(evt, msg='无需检查Node, 跳过', color='yellow')
+            return
         if  file_utils.check_file_exist('node'):
             self.add_log_handle(None,msg="node目录已存在，无需处理",color="green")
             return True
@@ -259,6 +327,10 @@ class Controller:
         self.ui.tk_button_update_btn.config(state='active')
     def _start_btn_handle(self,evt):
         """启动程序"""
+        cfg = ConfigManager()
+        if cfg.read("updateType",'') == '打开网页':
+            self.add_log_handle(evt, msg='无需启动程序, 跳过', color='yellow')
+            return True
         self.reset_btn()
         self.ui.tk_button_start_btn.config(state='disabled')
         self.ui.tk_button_update_btn.config(state='disabled')
@@ -356,7 +428,7 @@ class Controller:
         if not url:
             self.add_log_handle(None,msg="未配置启动URL，无法打开浏览器",color="yellow")
             return
-        if cfg.read("updateType","UpgradeLin") != "固定url":
+        if cfg.read("updateType","UpgradeLin") != "打开网页":
             if self.node_process is None or self.node_process.poll() is not None:
                 self.add_log_handle(None,msg="服务未运行，无法打开浏览器",color="yellow")
                 return

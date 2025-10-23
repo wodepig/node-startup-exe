@@ -11,14 +11,15 @@ class WinGUI(Tk):
     def __init__(self):
         super().__init__()
         self.__win()
+        self.admin_check_var = BooleanVar()
         self.tk_tabs_mgukgrl3 = self.__tk_tabs_mgukgrl3(self)
         self.tk_select_box_update_type = self.__tk_select_box_update_type( self.tk_tabs_mgukgrl3_1)
         self.tk_label_mgyhc1dz = self.__tk_label_mgyhc1dz( self.tk_tabs_mgukgrl3_1)
         self.tk_button_check_conf_btn = self.__tk_button_check_conf_btn( self.tk_tabs_mgukgrl3_1)
         self.tk_button_save_conf_btn = self.__tk_button_save_conf_btn( self.tk_tabs_mgukgrl3_1)
         self.tk_frame_ul_confg_dialog = self.__tk_frame_ul_confg_dialog( self.tk_tabs_mgukgrl3_1)
-        self.tk_input_ul_sk = self.__tk_input_ul_sk( self.tk_frame_ul_confg_dialog) 
         self.tk_label_mgyhdswe = self.__tk_label_mgyhdswe( self.tk_frame_ul_confg_dialog) 
+        self.tk_input_ul_sk = self.__tk_input_ul_sk( self.tk_frame_ul_confg_dialog) 
         self.tk_label_mgyhdbgc = self.__tk_label_mgyhdbgc( self.tk_frame_ul_confg_dialog) 
         self.tk_input_ul_url = self.__tk_input_ul_url( self.tk_frame_ul_confg_dialog) 
         self.tk_label_open_url = self.__tk_label_open_url( self.tk_frame_ul_confg_dialog) 
@@ -28,9 +29,15 @@ class WinGUI(Tk):
         self.tk_frame_fix_config_dialog = self.__tk_frame_fix_config_dialog( self.tk_tabs_mgukgrl3_1)
         self.tk_label_mgyibdn0 = self.__tk_label_mgyibdn0( self.tk_frame_fix_config_dialog) 
         self.tk_input_down_url = self.__tk_input_down_url( self.tk_frame_fix_config_dialog) 
+        self.tk_label_mh3585h5 = self.__tk_label_mh3585h5( self.tk_frame_fix_config_dialog) 
+        self.tk_input_down_open_url = self.__tk_input_down_open_url( self.tk_frame_fix_config_dialog) 
+        self.tk_label_mh358okn = self.__tk_label_mh358okn( self.tk_frame_fix_config_dialog) 
+        self.tk_label_mh35b9wt = self.__tk_label_mh35b9wt( self.tk_frame_fix_config_dialog) 
+        self.tk_select_box_down_update_time = self.__tk_select_box_down_update_time( self.tk_frame_fix_config_dialog) 
         self.tk_frame_url_config_dialog = self.__tk_frame_url_config_dialog( self.tk_tabs_mgukgrl3_1)
         self.tk_label_mgyij1po = self.__tk_label_mgyij1po( self.tk_frame_url_config_dialog) 
         self.tk_input_url_url = self.__tk_input_url_url( self.tk_frame_url_config_dialog) 
+        self.tk_label_mh3538c4 = self.__tk_label_mh3538c4( self.tk_frame_url_config_dialog) 
         self.tk_label_mgyxcy13 = self.__tk_label_mgyxcy13( self.tk_tabs_mgukgrl3_0)
         self.tk_label_mgyxd8r2 = self.__tk_label_mgyxd8r2( self.tk_tabs_mgukgrl3_0)
         self.tk_label_mgyxdd6i = self.__tk_label_mgyxdd6i( self.tk_tabs_mgukgrl3_0)
@@ -56,7 +63,6 @@ class WinGUI(Tk):
         self.tk_input_author_web = self.__tk_input_author_web( self.tk_tabs_mgukgrl3_2)
         self.tk_label_mh2z8h27 = self.__tk_label_mh2z8h27( self.tk_tabs_mgukgrl3_2)
         self.tk_input_author_email = self.__tk_input_author_email( self.tk_tabs_mgukgrl3_2)
-        self.tk_radio_button_mh2ztcuw = self.__tk_radio_button_mh2ztcuw( self.tk_tabs_mgukgrl3_0)
         self.tk_frame_mgyh9kz6 = self.__tk_frame_mgyh9kz6(self)
         self.tk_text_main_log = self.__tk_text_main_log( self.tk_frame_mgyh9kz6) 
     def __win(self):
@@ -128,7 +134,7 @@ class WinGUI(Tk):
         return frame
     def __tk_select_box_update_type(self,parent):
         cb = Combobox(parent, state="readonly", )
-        cb['values'] = ("UpgradeLin","固定链接","固定url")
+        cb['values'] = ("UpgradeLin","下载更新","打开网页")
         cb.place(x=98, y=15, width=150, height=30)
         return cb
     def __tk_label_mgyhc1dz(self,parent):
@@ -147,21 +153,21 @@ class WinGUI(Tk):
         frame = Frame(parent,)
         frame.place(x=19, y=65, width=819, height=90)
         return frame
-    def __tk_input_ul_sk(self,parent):
-        ipt = Entry(parent, )
-        ipt.place(x=306, y=0, width=180, height=30)
-        return ipt
     def __tk_label_mgyhdswe(self,parent):
         label = Label(parent,text="AK",anchor="center", )
         label.place(x=0, y=0, width=50, height=30)
         return label
+    def __tk_input_ul_sk(self,parent):
+        ipt = Entry(parent, )
+        ipt.place(x=306, y=0, width=180, height=30)
+        return ipt
     def __tk_label_mgyhdbgc(self,parent):
         label = Label(parent,text="唯一ID",anchor="center", )
         label.place(x=570, y=0, width=50, height=30)
         return label
     def __tk_input_ul_url(self,parent):
         ipt = Entry(parent, )
-        ipt.place(x=51, y=60, width=180, height=30)
+        ipt.place(x=55, y=60, width=180, height=30)
         return ipt
     def __tk_label_open_url(self,parent):
         label = Label(parent,text="url",anchor="center", )
@@ -173,7 +179,7 @@ class WinGUI(Tk):
         return ipt
     def __tk_input_ul_ak(self,parent):
         ipt = Entry(parent, )
-        ipt.place(x=46, y=0, width=180, height=30)
+        ipt.place(x=55, y=0, width=180, height=30)
         return ipt
     def __tk_label_mgyhdxym(self,parent):
         label = Label(parent,text="SK",anchor="center", )
@@ -185,24 +191,49 @@ class WinGUI(Tk):
         return frame
     def __tk_label_mgyibdn0(self,parent):
         label = Label(parent,text="下载地址",anchor="center", )
-        label.place(x=0, y=0, width=50, height=30)
+        label.place(x=0, y=40, width=50, height=30)
         return label
     def __tk_input_down_url(self,parent):
         ipt = Entry(parent, )
-        ipt.place(x=79, y=0, width=180, height=30)
+        ipt.place(x=79, y=40, width=180, height=30)
         return ipt
+    def __tk_label_mh3585h5(self,parent):
+        label = Label(parent,text="下载地址放构建物的压缩包地址",anchor="center", )
+        label.place(x=0, y=0, width=183, height=30)
+        return label
+    def __tk_input_down_open_url(self,parent):
+        ipt = Entry(parent, )
+        ipt.place(x=374, y=40, width=180, height=30)
+        return ipt
+    def __tk_label_mh358okn(self,parent):
+        label = Label(parent,text="打开地址",anchor="center", )
+        label.place(x=293, y=39, width=50, height=30)
+        return label
+    def __tk_label_mh35b9wt(self,parent):
+        label = Label(parent,text="更新频率",anchor="center", )
+        label.place(x=597, y=40, width=50, height=30)
+        return label
+    def __tk_select_box_down_update_time(self,parent):
+        cb = Combobox(parent, state="readonly", )
+        cb['values'] = ("每次启动时","从不")
+        cb.place(x=663, y=40, width=150, height=30)
+        return cb
     def __tk_frame_url_config_dialog(self,parent):
         frame = Frame(parent,)
         frame.place(x=19, y=65, width=819, height=90)
         return frame
     def __tk_label_mgyij1po(self,parent):
         label = Label(parent,text="网址",anchor="center", )
-        label.place(x=0, y=0, width=50, height=30)
+        label.place(x=0, y=40, width=50, height=30)
         return label
     def __tk_input_url_url(self,parent):
         ipt = Entry(parent, )
-        ipt.place(x=77, y=0, width=180, height=30)
+        ipt.place(x=79, y=40, width=180, height=30)
         return ipt
+    def __tk_label_mh3538c4(self,parent):
+        label = Label(parent,text="固定打开下方网址, 没有检查更新和启动node的功能",anchor="center", )
+        label.place(x=0, y=0, width=294, height=30)
+        return label
     def __tk_label_mgyxcy13(self,parent):
         label = Label(parent,text="系统版本",anchor="center", )
         label.place(x=23, y=15, width=80, height=30)
@@ -268,7 +299,7 @@ class WinGUI(Tk):
         btn.place(x=0, y=0, width=90, height=90)
         return btn
     def __tk_check_button_admin_check(self,parent):
-        cb = Checkbutton(parent,text="高级设置",)
+        cb = Checkbutton(parent,text="高级设置",variable=self.admin_check_var)
         cb.place(x=374, y=0, width=80, height=30)
         return cb
     def __tk_frame_normal_btns(self,parent):
@@ -303,10 +334,6 @@ class WinGUI(Tk):
         ipt = Entry(parent, )
         ipt.place(x=105, y=144, width=250, height=30)
         return ipt
-    def __tk_radio_button_mh2ztcuw(self,parent):
-        rb = Radiobutton(parent,text="单选框",)
-        rb.place(x=376, y=33, width=80, height=30)
-        return rb
     def __tk_frame_mgyh9kz6(self,parent):
         frame = Frame(parent,)
         frame.place(x=0, y=266, width=848, height=373)

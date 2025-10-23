@@ -9,6 +9,14 @@ def is_port_in_use(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         return s.connect_ex(('localhost', port)) == 0
 
+def get_port_from_url(url):
+    """从URL中提取端口号"""
+    try:
+        # 提取主机名和端口
+        host, port = url.split(':')[-2:]
+        return int(port)
+    except (ValueError, IndexError):
+        return 3000
 def kill_process_by_port(port):
     """杀掉占用指定端口的进程"""
     try:

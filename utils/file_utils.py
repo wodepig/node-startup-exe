@@ -4,18 +4,93 @@ import requests
 import zipfile
 import shutil
 from pathlib import Path
-from utils.utils import get_system_architecture
-def log_msg(msg,logHandle=None):
-    """打印日志
-    msg:日志内容
-    color:日志颜色
-    """
-    if color == "red":
-        print(f"\033[91m{msg}\033[0m")
-    elif color == "green":
-        print(f"\033[92m{msg}\033[0m")
-    else:
-        print(msg)
+import subprocess
+import utils.utils as utils
+from ConfigManager import ConfigManager
+def kill_port_process(defaultPort,logHandle=None):
+    """杀掉占用指定端口的进程"""
+    if utils.is_port_in_use(defaultPort):
+        if logHandle:
+            logHandle(evt=None,msg=f"端口{defaultPort}被占用，正在清理...")
+        killed_processes = utils.kill_process_by_port(defaultPort)
+        if killed_processes:
+            for process_info in killed_processes:
+                if logHandle:
+                    logHandle(evt=None,msg=f"已终止进程: {process_info}")
+            if logHandle:
+                logHandle(evt=None,msg=f"端口{defaultPort}清理完成")
+        else:
+            if logHandle:
+                logHandle(evt=None,msg=f"无法清理端口{defaultPort}的占用进程",color="red")
+            return False
+        return True
+    return True
+def start_node_server(logHandle=None):
+    """启动node服务器"""
+    if logHandle:
+        logHandle(evt=None,msg=f"开始启动node服务器")
+    try:
+        cfg = ConfigManager()
+        # 检查端口是否被占用，如果被占用则杀掉对应进程
+        defaultPort = cfg.read('appConfig.port',3000)
+        if kill_port_process(defaultPort,logHandle):
+            if logHandle:
+                logHandle(evt=None,msg=f"端口{defaultPort}清理完成")
+        else:
+            if logHandle:
+                logHandle(evt=None,msg=f"端口{defaultPort}清理失败",color="red")
+            return False
+        
+        # 使用固定的node.exe路径
+        node_path = Path(get_project_root()) / "node" / "node.exe"
+        index_js_path = Path(get_project_root()) / "dist"/"server"/"index.mjs"
+        cwd_path = Path(get_project_root())
+        # 启动Node服务
+        # print(f"启动Node服务: {node_path} {index_js_path} {cwd_path}")
+        # 设置端口环境变量，让Node应用能够读取
+        env = os.environ.copy()
+        env["PORT"] = str(defaultPort)
+        
+        # 在Windows上隐藏控制台窗口
+        startupinfo = None
+        if os.name == 'nt':  # Windows系统
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = 0  # SW_HIDE
+        
+        node_process = subprocess.Popen(
+            [node_path, index_js_path],
+            cwd=cwd_path,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,  # 将stderr重定向到stdout
+            text=True,
+            encoding="utf-8",  # 确保正确处理中文输出
+            bufsize=1,  # 行缓冲
+            universal_newlines=True,
+            env=env,  # 传递环境变量
+            startupinfo=startupinfo  # 隐藏控制台窗口
+        )
+        
+        # 启动线程来读取输出（避免阻塞Tkinter主循环）
+        # import threading
+        # self.output_thread = threading.Thread(target=self.read_process_output_thread, daemon=True)
+        # self.output_thread.start()
+        
+        # 等待服务启动
+        if logHandle:
+            logHandle(evt=None,msg=f"等待服务在端口{defaultPort}启动...")
+        if utils.wait_for_server(defaultPort):
+            if logHandle:
+                logHandle(evt=None,msg=f"服务已在端口{defaultPort}启动")
+            return node_process
+        else:
+            if logHandle:
+                logHandle(evt=None,msg=f"超时: 服务在30秒内未启动",color="red")
+            return False 
+    except Exception as e:
+        if logHandle:
+            logHandle(evt=None,msg=f"启动服务时出错: {str(e)}",color="red")
+        return False
 def unzip_file(file,folder,logHandle=None):
     """解压文件
     file: 文件名
@@ -113,6 +188,21 @@ def detect_node_version_dir(temp_dir):
     except Exception as e:
         print(f"检测node目录时出错: {str(e)}")
         return None
+def remove_item(*names):
+    """删除文件或目录"""
+    try:
+        for name in names:
+            item_path = Path(get_project_root()) / name
+            if not item_path.exists():
+                continue
+            if item_path.is_dir():
+                shutil.rmtree(item_path)
+                print(f"成功删除目录: {item_path}")
+            elif item_path.is_file():
+                item_path.unlink()
+                print(f"成功删除文件: {item_path}")
+    except Exception as e:
+        print(f"删除时出错: {str(e)}")
 def move_node_contents(temp_dir, target_dir, version_dir):
     """将node版本文件夹中的内容移动到目标node文件夹"""
     try:
@@ -176,12 +266,14 @@ def down_file(url,file_name,progress_callback=None, progress_update_callback=Non
         if progress_callback:
             progress_callback(evt=None,msg=f"下载失败: {str(e)}",color="red")
         return False
-def check_file_exist(file_name):
+def check_file_exist(*file_names):
     """检查文件是否存在,可传文件名或目录名"""
     # 使用 Path 拼接路径（推荐纯 Path 语法）
-    file_path = Path(get_project_root()) / file_name  # 用 Path 的 / 运算符拼接路径
-    if not file_path.exists():
-        return False
+    file_path = Path(get_project_root())
+    for file_name in file_names:
+        file_path = file_path / file_name  # 用 Path 的 / 运算符拼接路径
+        if not file_path.exists():
+            return False
     return True
 
 def get_project_root():

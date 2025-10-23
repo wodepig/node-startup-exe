@@ -11,6 +11,7 @@ class WinGUI(Tk):
     def __init__(self):
         super().__init__()
         self.__win()
+        self.admin_check_var = BooleanVar()
         self.tk_tabs_mgukgrl3 = self.__tk_tabs_mgukgrl3(self)
         self.tk_select_box_update_type = self.__tk_select_box_update_type( self.tk_tabs_mgukgrl3_1)
         self.tk_label_mgyhc1dz = self.__tk_label_mgyhc1dz( self.tk_tabs_mgukgrl3_1)
@@ -37,12 +38,25 @@ class WinGUI(Tk):
         self.tk_input_sys_version = self.__tk_input_sys_version( self.tk_tabs_mgukgrl3_0)
         self.tk_input_sys_user = self.__tk_input_sys_user( self.tk_tabs_mgukgrl3_0)
         self.tk_input_app_version = self.__tk_input_app_version( self.tk_tabs_mgukgrl3_0)
-        self.tk_button_update_btn = self.__tk_button_update_btn( self.tk_tabs_mgukgrl3_0)
-        self.tk_button_stop_btn = self.__tk_button_stop_btn( self.tk_tabs_mgukgrl3_0)
-        self.tk_button_start_btn = self.__tk_button_start_btn( self.tk_tabs_mgukgrl3_0)
         self.tk_frame_down_frame = self.__tk_frame_down_frame( self.tk_tabs_mgukgrl3_0)
         self.tk_label_down_label = self.__tk_label_down_label( self.tk_frame_down_frame) 
         self.tk_progressbar_down_progress = self.__tk_progressbar_down_progress( self.tk_frame_down_frame) 
+        self.tk_frame_admin_btns = self.__tk_frame_admin_btns( self.tk_tabs_mgukgrl3_0)
+        self.tk_button_stop_btn = self.__tk_button_stop_btn( self.tk_frame_admin_btns) 
+        self.tk_button_start_btn = self.__tk_button_start_btn( self.tk_frame_admin_btns) 
+        self.tk_button_open_browser_btn = self.__tk_button_open_browser_btn( self.tk_frame_admin_btns) 
+        self.tk_button_handle_node_btn = self.__tk_button_handle_node_btn( self.tk_frame_admin_btns) 
+        self.tk_button_clear_btn = self.__tk_button_clear_btn( self.tk_frame_admin_btns) 
+        self.tk_button_update_btn = self.__tk_button_update_btn( self.tk_frame_admin_btns) 
+        self.tk_check_button_admin_check = self.__tk_check_button_admin_check( self.tk_tabs_mgukgrl3_0)
+        self.tk_frame_normal_btns = self.__tk_frame_normal_btns( self.tk_tabs_mgukgrl3_0)
+        self.tk_button_one_start_btn = self.__tk_button_one_start_btn( self.tk_frame_normal_btns) 
+        self.tk_label_mh2z48wh = self.__tk_label_mh2z48wh( self.tk_tabs_mgukgrl3_2)
+        self.tk_input_author_wx = self.__tk_input_author_wx( self.tk_tabs_mgukgrl3_2)
+        self.tk_label_mh2z62gq = self.__tk_label_mh2z62gq( self.tk_tabs_mgukgrl3_2)
+        self.tk_input_author_web = self.__tk_input_author_web( self.tk_tabs_mgukgrl3_2)
+        self.tk_label_mh2z8h27 = self.__tk_label_mh2z8h27( self.tk_tabs_mgukgrl3_2)
+        self.tk_input_author_email = self.__tk_input_author_email( self.tk_tabs_mgukgrl3_2)
         self.tk_frame_mgyh9kz6 = self.__tk_frame_mgyh9kz6(self)
         self.tk_text_main_log = self.__tk_text_main_log( self.tk_frame_mgyh9kz6) 
     def __win(self):
@@ -96,6 +110,8 @@ class WinGUI(Tk):
         frame.add(self.tk_tabs_mgukgrl3_0, text="开始")
         self.tk_tabs_mgukgrl3_1 = self.__tk_frame_mgukgrl3_1(frame)
         frame.add(self.tk_tabs_mgukgrl3_1, text="设置")
+        self.tk_tabs_mgukgrl3_2 = self.__tk_frame_mgukgrl3_2(frame)
+        frame.add(self.tk_tabs_mgukgrl3_2, text="关于")
         frame.place(x=1, y=0, width=848, height=267)
         return frame
     def __tk_frame_mgukgrl3_0(self,parent):
@@ -103,6 +119,10 @@ class WinGUI(Tk):
         frame.place(x=1, y=0, width=848, height=267)
         return frame
     def __tk_frame_mgukgrl3_1(self,parent):
+        frame = Frame(parent)
+        frame.place(x=1, y=0, width=848, height=267)
+        return frame
+    def __tk_frame_mgukgrl3_2(self,parent):
         frame = Frame(parent)
         frame.place(x=1, y=0, width=848, height=267)
         return frame
@@ -207,18 +227,6 @@ class WinGUI(Tk):
         ipt = Entry(parent, )
         ipt.place(x=118, y=126, width=150, height=30)
         return ipt
-    def __tk_button_update_btn(self,parent):
-        btn = Button(parent, text="检查更新", takefocus=False,)
-        btn.place(x=472, y=14, width=90, height=90)
-        return btn
-    def __tk_button_stop_btn(self,parent):
-        btn = Button(parent, text="停止", takefocus=False,)
-        btn.place(x=713, y=14, width=90, height=90)
-        return btn
-    def __tk_button_start_btn(self,parent):
-        btn = Button(parent, text="启动", takefocus=False,)
-        btn.place(x=592, y=14, width=90, height=90)
-        return btn
     def __tk_frame_down_frame(self,parent):
         frame = Frame(parent,)
         frame.place(x=514, y=196, width=332, height=42)
@@ -231,6 +239,70 @@ class WinGUI(Tk):
         progressbar = Progressbar(parent, orient=HORIZONTAL,)
         progressbar.place(x=152, y=18, width=180, height=14)
         return progressbar
+    def __tk_frame_admin_btns(self,parent):
+        frame = Frame(parent,)
+        frame.place(x=454, y=0, width=394, height=148)
+        return frame
+    def __tk_button_stop_btn(self,parent):
+        btn = Button(parent, text="停止", takefocus=False,)
+        btn.place(x=304, y=0, width=90, height=90)
+        return btn
+    def __tk_button_start_btn(self,parent):
+        btn = Button(parent, text="启动", takefocus=False,)
+        btn.place(x=156, y=2, width=90, height=90)
+        return btn
+    def __tk_button_open_browser_btn(self,parent):
+        btn = Button(parent, text="打开浏览器", takefocus=False,)
+        btn.place(x=156, y=103, width=90, height=45)
+        return btn
+    def __tk_button_handle_node_btn(self,parent):
+        btn = Button(parent, text="处理Node", takefocus=False,)
+        btn.place(x=0, y=103, width=90, height=45)
+        return btn
+    def __tk_button_clear_btn(self,parent):
+        btn = Button(parent, text="清理目录", takefocus=False,)
+        btn.place(x=304, y=103, width=90, height=45)
+        return btn
+    def __tk_button_update_btn(self,parent):
+        btn = Button(parent, text="检查更新", takefocus=False,)
+        btn.place(x=0, y=0, width=90, height=90)
+        return btn
+    def __tk_check_button_admin_check(self,parent):
+        cb = Checkbutton(parent,text="高级设置",variable=self.admin_check_var)
+        cb.place(x=374, y=0, width=80, height=30)
+        return cb
+    def __tk_frame_normal_btns(self,parent):
+        frame = Frame(parent,)
+        frame.place(x=454, y=0, width=394, height=148)
+        return frame
+    def __tk_button_one_start_btn(self,parent):
+        btn = Button(parent, text="一键启动", takefocus=False,)
+        btn.place(x=0, y=0, width=90, height=90)
+        return btn
+    def __tk_label_mh2z48wh(self,parent):
+        label = Label(parent,text="微信:",anchor="center", )
+        label.place(x=42, y=23, width=50, height=30)
+        return label
+    def __tk_input_author_wx(self,parent):
+        ipt = Entry(parent, )
+        ipt.place(x=105, y=23, width=250, height=30)
+        return ipt
+    def __tk_label_mh2z62gq(self,parent):
+        label = Label(parent,text="主页:",anchor="center", )
+        label.place(x=39, y=86, width=50, height=30)
+        return label
+    def __tk_input_author_web(self,parent):
+        ipt = Entry(parent, )
+        ipt.place(x=105, y=86, width=250, height=30)
+        return ipt
+    def __tk_label_mh2z8h27(self,parent):
+        label = Label(parent,text="邮箱:",anchor="center", )
+        label.place(x=40, y=145, width=50, height=30)
+        return label
+    def __tk_input_author_email(self,parent):
+        ipt = Entry(parent, )
+        ipt.place(x=105, y=144, width=250, height=30)
+        return ipt
     def __tk_frame_mgyh9kz6(self,parent):
         frame = Frame(parent,)
         frame.place(x=0, y=266, width=848, height=373)
@@ -251,9 +323,14 @@ class Win(WinGUI):
         self.tk_select_box_update_type.bind('<<ComboboxSelected>>',self.ctl.change_update_type)
         self.tk_button_check_conf_btn.bind('<Button-1>',self.ctl.check_conf_btn_handle)
         self.tk_button_save_conf_btn.bind('<Button-1>',self.ctl.save_conf_btn_handle)
-        self.tk_button_update_btn.bind('<Button-1>',self.ctl.update_btn_handle)
         self.tk_button_stop_btn.bind('<Button-1>',self.ctl.stop_btn_handle)
         self.tk_button_start_btn.bind('<Button-1>',self.ctl.start_btn_handle)
+        self.tk_button_open_browser_btn.bind('<Button-1>',self.ctl.open_browser_btn_handle)
+        self.tk_button_handle_node_btn.bind('<Button-1>',self.ctl.handle_node_btn_click)
+        self.tk_button_clear_btn.bind('<Button-1>',self.ctl.clear_btn_handle)
+        self.tk_button_update_btn.bind('<Button-1>',self.ctl.update_btn_handle)
+        self.tk_check_button_admin_check.bind('<Button-1>',self.ctl.admin_check_change)
+        self.tk_button_one_start_btn.bind('<Button-1>',self.ctl.one_start_btn_click)
         pass
     def __style_config(self):
         pass

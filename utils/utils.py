@@ -1,6 +1,54 @@
 import datetime
 import platform
 import os
+import time
+import socket
+import psutil
+def is_port_in_use(port):
+    """检查端口是否被占用"""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(('localhost', port)) == 0
+
+def kill_process_by_port(port):
+    """杀掉占用指定端口的进程"""
+    try:
+        killed_processes = []
+        
+        # 获取所有网络连接
+        for conn in psutil.net_connections():
+            if conn.laddr and conn.laddr.port == port:
+                try:
+                    process = psutil.Process(conn.pid)
+                    process_name = process.name()
+                    process.terminate()
+                    
+                    # 等待进程结束
+                    try:
+                        process.wait(timeout=3)
+                    except psutil.TimeoutExpired:
+                        process.kill()
+                        
+                    killed_processes.append(f"{process_name} (PID: {conn.pid})")
+                    
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                    continue
+        
+        return killed_processes
+        
+    except Exception as e:
+        return []
+
+def wait_for_server(port, timeout=30):
+    """等待服务启动，超时返回False"""
+    start_time = time.time()
+    
+    while time.time() - start_time < timeout:
+        if is_port_in_use(port):
+            return True
+        time.sleep(1)
+    
+    return False
+
 
 def get_current_hms():
     """

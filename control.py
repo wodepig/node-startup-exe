@@ -7,6 +7,7 @@ QQ交流群:905019785
 from ast import For
 from ui import Win  
 import time
+import subprocess
 import sys
 from pathlib import Path
 import utils.file_utils as file_utils
@@ -25,10 +26,13 @@ class Controller:
         """
         得到UI实例，对组件进行初始化配置
         """
+
         self.ui = ui
         self.initConfig()
         # 隐藏下载信息
         self.ui.tk_frame_down_frame.place_forget()
+        # 状态变量
+        self.node_process = None
         # TODO 组件初始化 赋值操作
     def initConfig(self):
         cfg = ConfigManager()
@@ -52,6 +56,13 @@ class Controller:
         self.ui.tk_input_app_version.insert(0,cfg.read('appVersion',''))
         self.ui.tk_input_app_version.config(state='readonly')
         self.add_log_handle(None, "系统信息加载完成...")
+        # 加载作者信息
+        self.ui.tk_input_author_email.insert(0,cfg.read('author.email','作者邮箱'))
+        self.ui.tk_input_author_email.config(state='readonly')
+        self.ui.tk_input_author_wx.insert(0,cfg.read('author.wx','作者微信'))
+        self.ui.tk_input_author_wx.config(state='readonly')
+        self.ui.tk_input_author_web.insert(0,cfg.read('author.url','作者个人网站'))
+        self.ui.tk_input_author_web.config(state='readonly')
     def add_log_handle(self, evt, msg, color='black'):
         """
         处理日志输出
@@ -156,7 +167,7 @@ class Controller:
         self.ui.tk_button_update_btn.config(state='disabled')
         cfg = ConfigManager()
         appVersion = cfg.read("appVersion",0)
-        if appVersion == 0:
+        if appVersion == 0 or not file_utils.check_file_exist('dist'):
             self.add_log_handle(evt, msg='初始化下载源程序...')
             if cfg.read("ulConf.fileKey",0) == 0: 
                 self.add_log_handle(evt, msg='程序配置有误, 请去"关于"页面联系管理员', color='red')
@@ -198,6 +209,7 @@ class Controller:
         self.ui.tk_input_app_version.insert(0, str(appVersion))
         self.ui.tk_input_app_version.config(state='readonly')
     def update_btn_handle(self,evt):
+        # 检查更新
         if self.ui.tk_button_update_btn.state()[0] == 'disabled':
             self.add_log_handle(evt, msg='请等待任务处理完成...',color='yellow')
             return
@@ -208,8 +220,7 @@ class Controller:
                 daemon=True
             )
         download_thread.start()
-    def handle_node_zip(self,evt):
-        """处理node.zip文件"""
+    def _handle_node_zip(self,evt):
         if  file_utils.check_file_exist('node'):
             self.add_log_handle(None,msg="node目录已存在，无需处理",color="green")
             return True
@@ -228,14 +239,60 @@ class Controller:
         if not file_utils.handle_node_zip(self.add_log_handle):
             return False
         return True
+
+    def read_process_output_thread(self):
+        """在单独线程中读取进程输出"""
+        while self.node_process is not None and self.node_process.poll() is None:
+            try:
+                output = self.node_process.stdout.readline()
+                if output:
+                    # 使用线程安全的方式更新UI
+                    self.ui.after(0, lambda: self.add_log_handle(None,'程序输出:' + output.strip()))
+            except Exception as e:
+                if "I/O operation on closed file" not in str(e):
+                    self.ui.after(0, lambda: self.add_log_handle(None,f"读取输出时出错: {str(e)}",color="red"))
+                break
+    
+    def reset_btn(self):
+        self.ui.tk_button_start_btn.config(state='active')
+        self.ui.tk_button_stop_btn.config(state='active')
+        self.ui.tk_button_update_btn.config(state='active')
     def _start_btn_handle(self,evt):
         """启动程序"""
+        self.reset_btn()
         self.ui.tk_button_start_btn.config(state='disabled')
-        if not self.handle_node_zip(evt):
-            return False    
-        self.add_log_handle(None, f"开始启动程序...", color='green')
-        self.add_log_handle(None, f"程序启动成功", color='green')
-        self.ui.tk_button_start_btn.config(state='active')
+        self.ui.tk_button_update_btn.config(state='disabled')
+        if self.node_process is not None and self.node_process.poll() is None:
+            self.add_log_handle(None,msg="服务已经在运行中",color="yellow")
+            self.reset_btn()
+            return False
+        if not file_utils.check_file_exist('dist','server','index.mjs'):
+            self.add_log_handle(None,msg="源程序不存在，无法启动程序",color="red")
+            self.reset_btn()
+            return False
+        if not file_utils.check_file_exist('node','node.exe'):
+            self.add_log_handle(None,msg="启动器不存在，无法启动程序",color="red")
+            self.reset_btn()
+            return False
+        node_process = file_utils.start_node_server(self.add_log_handle)
+        if not node_process:
+            self.reset_btn()
+            return False
+        self.node_process = node_process
+        # 读取输出
+        import threading
+        node_thread = threading.Thread(
+                target=self.read_process_output_thread,
+                daemon=True
+            )
+        node_thread.start()
+        # self.read_process_output_thread()
+        # self.add_log_handle(None, f"开始启动程序...", color='green')
+        # self.add_log_handle(None, f"程序启动成功", color='green')
+        self.ui.tk_button_start_btn.config(state='disabled')
+        self.ui.tk_button_stop_btn.config(state='active')
+        self.ui.tk_button_update_btn.config(state='disabled')
+        return True
     def start_btn_handle(self,evt):
         if self.ui.tk_button_start_btn.state()[0] == 'disabled':
             self.add_log_handle(evt, msg='请等待任务处理完成...',color='yellow')
@@ -266,7 +323,59 @@ class Controller:
         except Exception as e:
             self.add_log_handle(None, f"下载失败: {str(e)}", color='red')
     def _stop_btn_handle(self,evt):
-        pass
+        """停止Node服务"""
+        if self.node_process is None or self.node_process.poll() is not None:
+            self.add_log_handle(None,msg="服务没有在运行",color="yellow")
+            self.reset_btn()
+            return    
+        try:
+            self.add_log_handle(None,msg="正在停止服务...",color="yellow")
+            self.node_process.terminate()
+            # 等待进程结束
+            timeout = 10
+            start_time = time.time()
+            while self.node_process.poll() is None and time.time() - start_time < timeout:
+                time.sleep(0.5)
+                
+            if self.node_process.poll() is None:
+                # 强制终止
+                self.node_process.kill()
+                
+            self.add_log_handle(None,msg="服务已停止")
+
+        except Exception as e:
+            self.add_log_handle(None,msg=f"停止服务时出错: {str(e)}",color="red")
+        finally:
+            self.node_process = None
+             # 重置按钮状态
+            self.reset_btn()
+    def open_browser_btn_handle(self,evt):
+        """打开浏览器访问服务"""
+        cfg = ConfigManager()
+        url = cfg.read("appConfig.url","")
+        if not url:
+            self.add_log_handle(None,msg="未配置启动URL，无法打开浏览器",color="yellow")
+            return
+        if cfg.read("updateType","UpgradeLin") != "固定url":
+            if self.node_process is None or self.node_process.poll() is not None:
+                self.add_log_handle(None,msg="服务未运行，无法打开浏览器",color="yellow")
+                return
+        self.add_log_handle(None,msg=f"打开浏览器访问: {url}",color="green")
+        import webbrowser
+        webbrowser.open(url)
+    def handle_node_btn_click(self,evt):
+        """处理Node.zip文件"""
+        import threading
+        handle_thread = threading.Thread(
+                target=self._handle_node_zip,
+                args=(evt,),
+                daemon=True
+            )
+        handle_thread.start()
+    def clear_btn_handle(self,evt):
+        """清除node目录"""
+        file_utils.remove_item('node','node_tmp','dist','node.zip','dist.zip')
+        self.add_log_handle(None,msg="相关目录已清除", color='green')
     def stop_btn_handle(self,evt):
         if self.ui.tk_button_stop_btn.state()[0] == 'disabled':
             self.add_log_handle(evt, msg='请等待任务处理完成...',color='yellow')
@@ -278,5 +387,32 @@ class Controller:
                 daemon=True
             )
         download_thread.start()
-    def open_brower_btn_handle(self,evt):
-        print("<Button-1>事件未处理:",evt)
+    def one_start_btn_click(self, evt):
+        # 一键启动服务：先更新再切换按钮显示
+        if self.ui.tk_button_one_start_btn.state()[0] == 'disabled':
+            self.add_log_handle(evt, msg='请等待任务处理完成...',color='yellow')
+            return
+        def _run():
+            try:
+                self._update_btn_handle(evt)
+                self._handle_node_zip(evt)
+                if self._start_btn_handle(evt):
+                    self.open_browser_btn_handle(evt)
+            except Exception as e:
+                self.add_log_handle(None,msg=f"一键启动服务时出错: {str(e)}",color="red")
+            finally:
+                self.ui.tk_button_one_start_btn.config(state='active')
+        self.ui.tk_button_one_start_btn.config(state='disabled')
+        import threading
+        start_thread = threading.Thread(target=_run, daemon=True)
+        start_thread.start()
+    def admin_check_change(self,evt):
+        type = self.ui.admin_check_var.get()
+        if type:
+            # self.add_log_handle(None,msg="展示普通按钮")
+            self.ui.tk_frame_normal_btns.place(x=454, y=0, width=394, height=148)
+            self.ui.tk_frame_admin_btns.place_forget()
+        else:
+            # self.add_log_handle(None,msg="展示高级按钮")
+            self.ui.tk_frame_normal_btns.place_forget()
+            self.ui.tk_frame_admin_btns.place(x=454, y=0, width=394, height=148)

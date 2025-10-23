@@ -1,4 +1,9 @@
 {
+    "author":{
+        "wx":"作者微信",
+        "email":"作者邮箱",
+        "url":"作者个人网站"
+    },
     "updateType":"UpgradeLin,固定链接,固定url",
     "ulConf":{
         "ak":"UpgradeLin的ak",
@@ -6,5 +11,14 @@
         "fileKey":"UpgradeLin的fileKey",
         "url":"http://localhost:3000"
     },
-    "appVersion":"1/2/3,UpgradeLin检查更新需要用到"
+    "appVersion":"1/2/3,UpgradeLin检查更新需要用到",
+    "nodeVersion":{
+        "win7_32": "https://cdn.npmmirror.com/binaries/node/v20.19.5/node-v20.19.5-win-x64.zip",
+        "win11_64": "https://cdn.npmmirror.com/binaries/node/v20.19.5/node-v20.19.5-win-x64.zip",
+        "win8_64": "https://cdn.npmmirror.com/binaries/node/v20.19.5/node-v20.19.5-win-x64.zip"
+    },
+    "appConfig":{
+        "url":"http://localhost:3000",
+        "port":3000
+    }
 }

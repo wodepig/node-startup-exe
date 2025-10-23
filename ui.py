@@ -11,7 +11,6 @@ class WinGUI(Tk):
     def __init__(self):
         super().__init__()
         self.__win()
-        self.admin_check_var = BooleanVar()
         self.tk_tabs_mgukgrl3 = self.__tk_tabs_mgukgrl3(self)
         self.tk_select_box_update_type = self.__tk_select_box_update_type( self.tk_tabs_mgukgrl3_1)
         self.tk_label_mgyhc1dz = self.__tk_label_mgyhc1dz( self.tk_tabs_mgukgrl3_1)
@@ -57,6 +56,7 @@ class WinGUI(Tk):
         self.tk_input_author_web = self.__tk_input_author_web( self.tk_tabs_mgukgrl3_2)
         self.tk_label_mh2z8h27 = self.__tk_label_mh2z8h27( self.tk_tabs_mgukgrl3_2)
         self.tk_input_author_email = self.__tk_input_author_email( self.tk_tabs_mgukgrl3_2)
+        self.tk_radio_button_mh2ztcuw = self.__tk_radio_button_mh2ztcuw( self.tk_tabs_mgukgrl3_0)
         self.tk_frame_mgyh9kz6 = self.__tk_frame_mgyh9kz6(self)
         self.tk_text_main_log = self.__tk_text_main_log( self.tk_frame_mgyh9kz6) 
     def __win(self):
@@ -268,7 +268,7 @@ class WinGUI(Tk):
         btn.place(x=0, y=0, width=90, height=90)
         return btn
     def __tk_check_button_admin_check(self,parent):
-        cb = Checkbutton(parent,text="高级设置",variable=self.admin_check_var)
+        cb = Checkbutton(parent,text="高级设置",)
         cb.place(x=374, y=0, width=80, height=30)
         return cb
     def __tk_frame_normal_btns(self,parent):
@@ -303,6 +303,10 @@ class WinGUI(Tk):
         ipt = Entry(parent, )
         ipt.place(x=105, y=144, width=250, height=30)
         return ipt
+    def __tk_radio_button_mh2ztcuw(self,parent):
+        rb = Radiobutton(parent,text="单选框",)
+        rb.place(x=376, y=33, width=80, height=30)
+        return rb
     def __tk_frame_mgyh9kz6(self,parent):
         frame = Frame(parent,)
         frame.place(x=0, y=266, width=848, height=373)
@@ -320,6 +324,7 @@ class Win(WinGUI):
         self.__style_config()
         self.ctl.init(self)
     def __event_bind(self):
+        self.bind('<Destroy>',self.ctl.close_handle)
         self.tk_select_box_update_type.bind('<<ComboboxSelected>>',self.ctl.change_update_type)
         self.tk_button_check_conf_btn.bind('<Button-1>',self.ctl.check_conf_btn_handle)
         self.tk_button_save_conf_btn.bind('<Button-1>',self.ctl.save_conf_btn_handle)

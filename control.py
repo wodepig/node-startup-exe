@@ -416,3 +416,31 @@ class Controller:
             # self.add_log_handle(None,msg="展示高级按钮")
             self.ui.tk_frame_normal_btns.place_forget()
             self.ui.tk_frame_admin_btns.place(x=454, y=0, width=394, height=148)
+    def close_handle(self,evt):
+        """处理窗口销毁事件，防止多次调用"""
+        # 检查是否是主窗口的销毁事件（不是子控件的）
+        if evt.widget == self.ui:
+            # 使用标志位防止多次调用
+            if not hasattr(self, '_destroy_called'):
+                self._destroy_called = True
+                print("应用程序正在关闭...")
+                
+                # 停止正在运行的Node服务
+                if hasattr(self, 'node_process') and self.node_process is not None:
+                    try:
+                        if self.node_process.poll() is None:
+                            self.node_process.terminate()
+                            # 等待进程结束
+                            import time
+                            timeout = 5
+                            start_time = time.time()
+                            while self.node_process.poll() is None and time.time() - start_time < timeout:
+                                time.sleep(0.1)
+                            
+                            if self.node_process.poll() is None:
+                                self.node_process.kill()
+                    except Exception as e:
+                        print(f"停止服务时出错: {e}")
+                
+                # 清理资源 - 使用print而不是add_log_handle，因为UI可能已经销毁
+                print("应用程序关闭完成")

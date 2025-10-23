@@ -230,6 +230,21 @@ class Controller:
             self.add_log_handle(evt, msg='无需更新源码, 跳过', color='yellow')
             self.ui.tk_button_update_btn.config(state='active')
             return
+        if cfg.read("updateType",'') == '下载更新':
+            if cfg.read("downConf.updateTime",'') == '从不':
+                self.add_log_handle(evt, msg='不主动更新源码, 跳过', color='yellow')
+                self.ui.tk_button_update_btn.config(state='active')
+                return
+            # 处理源码更新 TODO 非nuxt项目
+            self.add_log_handle(evt, msg='初始化下载源程序...')
+            downUrl = cfg.read("downConf.url",'')
+            if not downUrl:
+                self.add_log_handle(evt, msg='下载地址为空, 请先配置', color='red')
+                return
+            self._start_down(downUrl,"dist.zip")
+            file_utils.unzip_file('dist.zip','dist',self.add_log_handle)
+            self.ui.tk_button_update_btn.config(state='active')
+            return
         appVersion = cfg.read("appVersion",0)
         if appVersion == 0 or not file_utils.check_file_exist('dist'):
             self.add_log_handle(evt, msg='初始化下载源程序...')
@@ -274,16 +289,21 @@ class Controller:
         self.ui.tk_input_app_version.config(state='readonly')
     def update_btn_handle(self,evt):
         # 检查更新
-        if self.ui.tk_button_update_btn.state()[0] == 'disabled':
-            self.add_log_handle(evt, msg='请等待任务处理完成...',color='yellow')
-            return
-        import threading
-        download_thread = threading.Thread(
-                target=self._update_btn_handle,
-                args=(evt,),
-                daemon=True
-            )
-        download_thread.start()
+        try:
+            if self.ui.tk_button_update_btn.state()[0] == 'disabled':
+                self.add_log_handle(evt, msg='请等待任务处理完成...',color='yellow')
+                return
+            import threading
+            download_thread = threading.Thread(
+                    target=self._update_btn_handle,
+                    args=(evt,),
+                    daemon=True
+                )
+            download_thread.start()
+        except Exception as e:
+            self.add_log_handle(evt, msg=f'更新检查失败: {str(e)}',color='red')
+        finally:
+            self.ui.tk_button_update_btn.config(state='active')
     def _handle_node_zip(self,evt):
         cfg = ConfigManager()
         if cfg.read("updateType",'') == '打开网页':

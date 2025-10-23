@@ -208,19 +208,45 @@ class Controller:
                 daemon=True
             )
         download_thread.start()
-        # self._update_btn_handle(evt)
-        # 判断是否后dist.zip文件
-        # print(file_utils.get_project_root())
-        # print(file_utils.check_file_exist('dist.zip'))
-        # if not os.path.exists('dist.zip'):
-        #     self.add_log_handle(evt, msg='请先打包dist.zip文件',color='red')
-        #     return
-        
-        # print("检查更新处理结束:",evt)
+    def handle_node_zip(self,evt):
+        """处理node.zip文件"""
+        if  file_utils.check_file_exist('node'):
+            self.add_log_handle(None,msg="node目录已存在，无需处理",color="green")
+            return True
+        if  file_utils.check_file_exist('node.zip'):
+            self.add_log_handle(None,msg="node.zip文件已存在，直接解压")
+            if not file_utils.handle_node_zip(self.add_log_handle):
+                return False
+            return True
+        sysVersion = get_system_architecture()
+        cfg = ConfigManager()
+        nodeDownUrl = cfg.read(f'nodeVersion.{sysVersion}','')
+        if nodeDownUrl == '':
+            self.add_log_handle(evt, msg=f'未配置{sysVersion}的node下载地址',color='red')
+            return False
+        self._start_down(nodeDownUrl,"node.zip")
+        if not file_utils.handle_node_zip(self.add_log_handle):
+            return False
+        return True
+    def _start_btn_handle(self,evt):
+        """启动程序"""
+        self.ui.tk_button_start_btn.config(state='disabled')
+        if not self.handle_node_zip(evt):
+            return False    
+        self.add_log_handle(None, f"开始启动程序...", color='green')
+        self.add_log_handle(None, f"程序启动成功", color='green')
+        self.ui.tk_button_start_btn.config(state='active')
     def start_btn_handle(self,evt):
-
-
-        print("<Button-1>事件未处理:",evt)
+        if self.ui.tk_button_start_btn.state()[0] == 'disabled':
+            self.add_log_handle(evt, msg='请等待任务处理完成...',color='yellow')
+            return
+        import threading
+        download_thread = threading.Thread(
+                target=self._start_btn_handle,
+                args=(evt,),
+                daemon=True
+            )
+        download_thread.start()
     def _start_down(self,downUrl,fileName):
         """启动下载线程"""
         try:
@@ -239,8 +265,18 @@ class Controller:
             # self.add_log_handle(None, f"开始下载: {fileName}")
         except Exception as e:
             self.add_log_handle(None, f"下载失败: {str(e)}", color='red')
+    def _stop_btn_handle(self,evt):
+        pass
     def stop_btn_handle(self,evt):
-        file_utils.handle_node_zip(self.add_log_handle)
-        print("<Button-1>事件未处理:",evt)
+        if self.ui.tk_button_stop_btn.state()[0] == 'disabled':
+            self.add_log_handle(evt, msg='请等待任务处理完成...',color='yellow')
+            return
+        import threading
+        download_thread = threading.Thread(
+                target=self._stop_btn_handle,
+                args=(evt,),
+                daemon=True
+            )
+        download_thread.start()
     def open_brower_btn_handle(self,evt):
         print("<Button-1>事件未处理:",evt)

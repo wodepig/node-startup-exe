@@ -4,6 +4,7 @@ import requests
 import zipfile
 import shutil
 from pathlib import Path
+from utils.utils import get_system_architecture
 def log_msg(msg,logHandle=None):
     """打印日志
     msg:日志内容
@@ -85,6 +86,7 @@ def handle_node_zip(logHandle=None):
         if logHandle:
             logHandle(evt=None,msg="无法处理node文件",color="red")
         return False
+    return True
 
 def detect_node_version_dir(temp_dir):
     """自动检测node压缩包解压后的版本目录"""
@@ -119,31 +121,18 @@ def move_node_contents(temp_dir, target_dir, version_dir):
         
         if not os.path.exists(version_path):
             return False
-            
+        if os.path.exists(target_dir):
+            # 先删除目标目录（如果存在）
+            shutil.rmtree(target_dir)
         # 创建目标目录
-        os.makedirs(target_dir, exist_ok=True)
+        # os.makedirs(target_dir, exist_ok=True)
         
         # 获取所有项目
-        items = os.listdir(version_path)
-        # 移动版本目录中的所有内容到目标目录
-        for item in items:
-            source = os.path.join(version_path, item)
-            destination = os.path.join(target_dir, item)
-            
-            # 如果目标已存在则先删除
-            if os.path.exists(destination):
-                if os.path.isdir(destination):
-                    shutil.rmtree(destination)
-                else:
-                    os.remove(destination)
-            
-            # 移动文件或目录
-            shutil.move(source, destination)
-        
+        # items = os.listdir(version_path)
+        shutil.copytree(version_path, target_dir)
         # 删除临时解压目录
         shutil.rmtree(temp_dir)
         return True
-        
     except Exception as e:
         print(f"移动node文件失败: {str(e)}")
         return False
@@ -205,6 +194,3 @@ def get_project_root():
         # 如果直接执行，使用当前工作目录
         import os
         return Path(os.getcwd()).resolve()
-
-# 测试输出项目根目录
-print("项目根目录:", get_project_root())

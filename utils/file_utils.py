@@ -46,10 +46,11 @@ def start_node_server(logHandle=None):
         index_js_path = Path(get_project_root()) / "dist"/"server"/"index.mjs"
         cwd_path = Path(get_project_root())
         # 启动Node服务
-        # print(f"启动Node服务: {node_path} {index_js_path} {cwd_path}")
+        print(f"启动Node服务:{os.name} {node_path} {index_js_path} {cwd_path}")
         # 设置端口环境变量，让Node应用能够读取
         env = os.environ.copy()
         env["PORT"] = str(defaultPort)
+        env["NODE_SKIP_PLATFORM_CHECK"] = str(1)
         
         # 在Windows上隐藏控制台窗口
         startupinfo = None
@@ -59,8 +60,8 @@ def start_node_server(logHandle=None):
             startupinfo.wShowWindow = 0  # SW_HIDE
         
         node_process = subprocess.Popen(
-            [node_path, index_js_path],
-            cwd=cwd_path,
+            [str(node_path), str(index_js_path)],
+            cwd=str(cwd_path),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,  # 将stderr重定向到stdout
             text=True,
@@ -81,7 +82,7 @@ def start_node_server(logHandle=None):
             logHandle(evt=None,msg=f"等待服务在端口{defaultPort}启动...")
         if utils.wait_for_server(defaultPort):
             if logHandle:
-                logHandle(evt=None,msg=f"服务已在端口{defaultPort}启动")
+                logHandle(evt=None,msg=f"启动成功, 服务已在端口{defaultPort}启动",color="green")
             return node_process
         else:
             if logHandle:
@@ -275,7 +276,7 @@ def check_file_exist(*file_names):
         if not file_path.exists():
             return False
     return True
-def release_config_file():
+def release_config_file(logHandle):
     """
     释放默认配置文件
     """
@@ -284,16 +285,19 @@ def release_config_file():
     source_path = Path(get_project_root(True)) / 'config.json'
     #1.先判断运行目录是否有config.json
     if target_file.exists():
-        print(f'config.json已在运行目录存在{target_file}')
+        if logHandle:
+            logHandle(evt=None,msg=f'config.json已在运行目录存在{target_file}')
         return
     else:
         pass
     #2.如果没有，判断是否有默认配置文件
     if not source_path.exists():
-        print(f'临时文件夹中不存在默认配置文件{source_path}')
+        if logHandle:
+            logHandle(evt=None,msg=f'临时文件夹中不存在默认配置文件{source_path}')
         return
     #3.如果有默认配置文件，复制到运行目录
-    print(f'复制默认配置文件到{target_path}')
+    if logHandle:
+        logHandle(evt=None,msg=f'复制默认配置文件到{target_path}')
     shutil.copy(source_path,target_path)
 
 def get_project_root(tmp=False):

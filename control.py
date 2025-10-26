@@ -28,7 +28,7 @@ class Controller:
         """
 
         self.ui = ui
-        file_utils.release_config_file()
+        file_utils.release_config_file(self.add_log_handle)
         self.initConfig()
         # 隐藏下载信息
         self.ui.tk_frame_down_frame.place_forget()
@@ -182,9 +182,9 @@ class Controller:
                 # 保存配置
                 cfg = ConfigManager()
                 cfg.write('ulConf.ak', ak)
-                cfg.write('ulConf.ak', ak)
                 cfg.write('ulConf.sk', sk)
                 cfg.write('ulConf.fileKey', fk)
+                cfg.write('ulConf.url', openUrl)
                 cfg.write('updateType', 'UpgradeLin')
                 cfg.write('appConfig.url', openUrl)
                 cfg.write('appConfig.port', get_port_from_url(openUrl))

@@ -26,6 +26,7 @@
         "win8_64": "https://cdn.npmmirror.com/binaries/node/v20.19.5/node-v20.19.5-win-x64.zip"
     },
     "appConfig":{
+        "autoStart": "true/false,字符串形式.是否自动启动服务",
         "url":"http://localhost:3000",
         "port":3000
     }

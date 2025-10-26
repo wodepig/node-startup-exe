@@ -66,7 +66,7 @@ class WinGUI(Tk):
         self.tk_frame_mgyh9kz6 = self.__tk_frame_mgyh9kz6(self)
         self.tk_text_main_log = self.__tk_text_main_log( self.tk_frame_mgyh9kz6) 
     def __win(self):
-        self.title("Tkinter布局助手")
+        self.title("程序启动器")
         # 设置窗口大小、居中
         width = 849
         height = 640

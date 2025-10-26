@@ -1,10 +1,17 @@
 import os
 import json  # 需导入json模块
-
+from pathlib import Path
+# from utils.file_utils import get_project_root
 class ConfigManager:
+
     def get_config_path(self):
         """获取 config.json 文件的路径"""
-        return os.path.join(os.path.dirname(__file__), 'config.json')
+        # return os.path.join(os.path.dirname(__file__), 'config.json')
+        print('配置文件位置:')
+        print(Path(self.get_project_root()) / 'config.json')
+        print(os.path.join(os.path.dirname(__file__), 'config.json'))
+        # return os.path.join(os.path.dirname(__file__), 'config.json')
+        return Path(self.get_project_root()) / 'config.json'
     
     def read(self, key, default=None):
         """从 config.json 读取指定键的值（支持嵌套键）"""
@@ -25,7 +32,23 @@ class ConfigManager:
             return current
         except (json.JSONDecodeError, IOError):
             return default
-    
+    def get_project_root(self):
+        """获取项目根目录（main.py所在的目录）"""
+        try:
+                # 获取.exe所在的目录（打包后有效）
+            if getattr(sys, 'frozen', False):
+            # 打包状态：sys.executable 是.exe的路径
+                exe_dir = os.path.dirname(sys.executable)
+            else:
+                # 开发状态：__file__ 是当前脚本路径
+                exe_dir = os.path.dirname(os.path.abspath(__file__))
+                # 如果当前文件被导入，使用 __file__ 获取项目根目录
+            current_file = Path(exe_dir)
+            return current_file.parent.resolve()
+        except NameError:
+            # 如果直接执行，使用当前工作目录
+            import os
+            return Path(os.getcwd()).resolve()
     def write(self, key, value):  # 修复缩进：函数定义需缩进
         """向 config.json 写入/更新指定键的值（支持嵌套键）"""
         config_path = self.get_config_path()  # 需用self调用实例方法

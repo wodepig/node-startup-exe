@@ -242,7 +242,7 @@ def down_file(url,file_name,progress_callback=None, progress_update_callback=Non
         downloaded_size = 0
         
         if progress_callback:
-            progress_callback(evt=None,msg=f"开始下载: {os.path.basename(save_path)}")
+            progress_callback(evt=None,msg=f"开始下载: {os.path.basename(save_path)}到{save_path}")
             progress_callback(evt=None,msg=f"文件大小: {total_size / (1024*1024):.2f} MB")
         
         with open(save_path, 'wb') as file:
@@ -275,14 +275,44 @@ def check_file_exist(*file_names):
         if not file_path.exists():
             return False
     return True
+def release_config_file():
+    """
+    释放默认配置文件
+    """
+    target_path = Path(get_project_root())
+    target_file = target_path / 'config.json'
+    source_path = Path(get_project_root(True)) / 'config.json'
+    #1.先判断运行目录是否有config.json
+    if target_file.exists():
+        print(f'config.json已在运行目录存在{target_file}')
+        return
+    else:
+        pass
+    #2.如果没有，判断是否有默认配置文件
+    if not source_path.exists():
+        print(f'临时文件夹中不存在默认配置文件{source_path}')
+        return
+    #3.如果有默认配置文件，复制到运行目录
+    print(f'复制默认配置文件到{target_path}')
+    shutil.copy(source_path,target_path)
 
-def get_project_root():
+def get_project_root(tmp=False):
     """获取项目根目录（main.py所在的目录）"""
     try:
         # 如果当前文件被导入，使用 __file__ 获取项目根目录
-        current_file = Path(__file__)
-        return current_file.parent.parent.resolve()
+        if getattr(sys, 'frozen', False) and not tmp:
+            print(f'打包状态：sys.executable 是.exe的路径{sys.executable}')
+            # 打包状态：sys.executable 是.exe的路径
+            exe_dir = os.path.dirname(sys.executable)
+            return Path(exe_dir).resolve()
+        else:
+            print(f'开发状态：__file__ 是当前脚本路径{__file__}')
+                # 开发状态：__file__ 是当前脚本路径
+            # exe_dir = os.path.dirname(__file__)
+            # exe_dir = os.path.dirname(os.path.abspath(__file__))
+            return Path(__file__).parent.parent.resolve()
     except NameError:
+        print('无法获取项目根目录，使用当前工作目录')
         # 如果直接执行，使用当前工作目录
         import os
         return Path(os.getcwd()).resolve()

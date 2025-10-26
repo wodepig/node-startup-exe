@@ -28,19 +28,28 @@ class Controller:
         """
 
         self.ui = ui
+        file_utils.release_config_file()
         self.initConfig()
         # 隐藏下载信息
         self.ui.tk_frame_down_frame.place_forget()
         # 状态变量
         self.node_process = None
+        
+        # 延迟启动服务，确保UI完全初始化
+        cfg = ConfigManager()
+
+        autoStart = cfg.read('appConfig.autoStart','true')
+        if autoStart == 'true':
+            self.ui.after(1000, self.one_start_btn_click,None)
         # TODO 组件初始化 赋值操作
     def initConfig(self):
         cfg = ConfigManager()
         # 初始化更新类型
-        updateType = cfg.read('updateType','UpgradeLin')
-        updateTypeList = ['UpgradeLin','下载更新','打开网页']
-        self.ui.tk_select_box_update_type.current(updateTypeList.index(updateType))
-        self.change_update_type(None)
+        updateType = cfg.read('updateType','')
+        if cfg.read('updateType','') != '':
+            updateTypeList = ['UpgradeLin','下载更新','打开网页']
+            self.ui.tk_select_box_update_type.current(updateTypeList.index(updateType))
+            self.change_update_type(None)
         # 初始化值
         ulConf = cfg.read('ulConf',{})
         self.ui.tk_input_ul_ak.insert(0,ulConf.get('ak',''))
@@ -50,6 +59,8 @@ class Controller:
         else:
             self.ui.tk_input_ul_url.insert(0,ulConf.get('url',''))
         self.ui.tk_input_ul_filekey.insert(0,ulConf.get('fileKey',''))
+        self.ui.tk_input_ul_sk.config(show='*')
+        self.ui.tk_input_ul_filekey.config(show='*')
         # 下载更新的配置
         downConf = cfg.read('downConf',{})
         if downConf.get('url','') == '':
@@ -323,6 +334,9 @@ class Controller:
         if nodeDownUrl == '':
             self.add_log_handle(evt, msg=f'未配置{sysVersion}的node下载地址',color='red')
             return False
+        self.add_log_handle(None,msg=f"首次下次速度较慢, 后续不需重复下载, 请等待", color="green")
+        self.add_log_handle(None,msg=f"首次下次速度较慢, 后续不需重复下载, 请等待", color="green")
+        self.add_log_handle(None,msg=f"首次下次速度较慢, 后续不需重复下载, 请等待", color="green")
         self._start_down(nodeDownUrl,"node.zip")
         if not file_utils.handle_node_zip(self.add_log_handle):
             return False
@@ -479,9 +493,10 @@ class Controller:
                 daemon=True
             )
         download_thread.start()
-    def one_start_btn_click(self, evt):
+    def one_start_btn_click(self,evt):
         # 一键启动服务：先更新再切换按钮显示
-        if self.ui.tk_button_one_start_btn.state()[0] == 'disabled':
+        button_state = self.ui.tk_button_one_start_btn.state()
+        if len(button_state) > 0 and button_state[0] == 'disabled':
             self.add_log_handle(evt, msg='请等待任务处理完成...',color='yellow')
             return
         def _run():
@@ -492,8 +507,20 @@ class Controller:
                     self.open_browser_btn_handle(evt)
             except Exception as e:
                 self.add_log_handle(None,msg=f"一键启动服务时出错: {str(e)}",color="red")
+                # 如果网络异常, 在本地有node/dist目录时, 也要正确启动服务
+                self.add_log_handle(None,msg="")
+                self.add_log_handle(None,msg="")
+                self.add_log_handle(None,msg="")
+                self.add_log_handle(None,msg=f"尝试本地启动服务, 请在合适时联系管理员排查问题",color="red")
+                if self._start_btn_handle(evt):
+                    self.open_browser_btn_handle(evt)
+
             finally:
                 self.ui.tk_button_one_start_btn.config(state='active')
+        cfg = ConfigManager()
+        if cfg.read('updateType','') == '':
+            self.add_log_handle(None,msg='请先去设置配置更新类型',color='yellow')
+            return
         self.ui.tk_button_one_start_btn.config(state='disabled')
         import threading
         start_thread = threading.Thread(target=_run, daemon=True)
@@ -508,6 +535,16 @@ class Controller:
             # self.add_log_handle(None,msg="展示高级按钮")
             self.ui.tk_frame_normal_btns.place_forget()
             self.ui.tk_frame_admin_btns.place(x=454, y=0, width=394, height=148)
+    def start_handle(self,evt):
+        """处理启动Node服务按钮点击事件"""
+        print("启动Node服务按钮点击事件")
+        # import threading
+        # start_thread = threading.Thread(
+        #         target=self._start_btn_handle,
+        #         args=(evt,),
+        #         daemon=True
+        #     )
+        # start_thread.start()
     def close_handle(self,evt):
         """处理窗口销毁事件，防止多次调用"""
         # 检查是否是主窗口的销毁事件（不是子控件的）

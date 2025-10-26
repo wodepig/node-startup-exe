@@ -50,6 +50,7 @@ def start_node_server(logHandle=None):
         # 设置端口环境变量，让Node应用能够读取
         env = os.environ.copy()
         env["PORT"] = str(defaultPort)
+        # 跳过平台检查，解决win7下启动node.exe报错的问题
         env["NODE_SKIP_PLATFORM_CHECK"] = str(1)
         
         # 在Windows上隐藏控制台窗口
@@ -305,18 +306,12 @@ def get_project_root(tmp=False):
     try:
         # 如果当前文件被导入，使用 __file__ 获取项目根目录
         if getattr(sys, 'frozen', False) and not tmp:
-            print(f'打包状态：sys.executable 是.exe的路径{sys.executable}')
             # 打包状态：sys.executable 是.exe的路径
             exe_dir = os.path.dirname(sys.executable)
             return Path(exe_dir).resolve()
         else:
-            print(f'开发状态：__file__ 是当前脚本路径{__file__}')
-                # 开发状态：__file__ 是当前脚本路径
-            # exe_dir = os.path.dirname(__file__)
-            # exe_dir = os.path.dirname(os.path.abspath(__file__))
             return Path(__file__).parent.parent.resolve()
     except NameError:
         print('无法获取项目根目录，使用当前工作目录')
         # 如果直接执行，使用当前工作目录
-        import os
         return Path(os.getcwd()).resolve()

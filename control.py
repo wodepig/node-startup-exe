@@ -53,7 +53,7 @@ class Controller:
         # 初始化值
         ulConf = cfg.read('ulConf',{})
         self.ui.tk_input_ul_ak.insert(0,ulConf.get('ak',''))
-        self.ui.tk_input_ul_sk.insert(0,ulConf.get('sk',''))
+        self.ui.tk_input_ul_sk.insert(0,cfg.decrypt_data(ulConf.get('sk','')))
         if  ulConf.get('url','') == '':
             self.ui.tk_input_ul_url.insert(0,"http://localhost:3000")
         else:

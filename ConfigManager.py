@@ -2,32 +2,50 @@ import os
 import json  # 需导入json模块
 import sys
 from pathlib import Path
- # Fernet 是 AES 的简化封装，更易用
-from cryptography.fernet import Fernet
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+from Crypto.Random import get_random_bytes
 # 配置文件中需要加密的字段
 need_encrypt = ['ulConf.sk','sk']
-KEY = b'abedefg'  # 替换为你生成的密钥 Fernet.generate_key()
+KEY = b'o\xfd\xbb\x9b\x14\x92\x85/W\x1e\xb1\x04\xff\xa0\xa4\x1c'  # 替换为你生成的密钥 Fernet.generate_key()
 
 
 
 class ConfigManager:
-
     def get_config_path(self):
         """获取 config.json 文件的路径"""
         return Path(self.get_project_root()) / 'config.json'
-    def encrypt_data(self,data):
-        """加密字符串（先转为 bytes）"""
-        cipher = Fernet(KEY)
-        return cipher.encrypt(data.encode()).decode()  # 加密后转为字符串，方便存储
+    
+    def encrypt_data(self,sensitive_data):
+        """加密敏感数据（字符串）"""
+        # 生成随机IV（16字节，每次加密不同）
+        iv = get_random_bytes(16)
+        # 创建AES加密器（CBC模式）
+        cipher = AES.new(KEY, AES.MODE_CBC, iv)
+        # 加密：数据填充为16字节倍数 -> 加密 -> 拼接IV（解密时需要）
+        data_bytes = sensitive_data.encode('utf-8')
+        encrypted_bytes = cipher.encrypt(pad(data_bytes, AES.block_size))
+        # 返回：IV + 加密数据（转为十六进制字符串存储，避免乱码）
+        return (iv + encrypted_bytes).hex()
 
-    def decrypt_data(self,encrypted_data):
-        """解密字符串（先转为 bytes）"""
-        cipher = Fernet(KEY)
-        return cipher.decrypt(encrypted_data.encode()).decode()
+    def decrypt_data(self,encrypted_str):
+        """解密数据（输入加密后的十六进制字符串）"""
+        # 转为字节
+        encrypted_bytes = bytes.fromhex(encrypted_str)
+        # 拆分IV（前16字节）和加密数据
+        iv = encrypted_bytes[:16]
+        data_bytes = encrypted_bytes[16:]
+        # 创建AES解密器
+        cipher = AES.new(KEY, AES.MODE_CBC, iv)
+        # 解密并去除填充
+        decrypted_bytes = unpad(cipher.decrypt(data_bytes), AES.block_size)
+        return decrypted_bytes.decode('utf-8')
+
 
     def read(self, key, default=None):
         """从 config.json 读取指定键的值（支持嵌套键）"""
         config_path = self.get_config_path()  # 需用self调用实例方法
+        print(f'(cfg)配置文件路径：{config_path}')
         if not os.path.exists(config_path):
             return default
         
@@ -47,27 +65,11 @@ class ConfigManager:
         except (json.JSONDecodeError, IOError):
             return default
 
-    def get_project_root(tmp=False):
-        """获取项目根目录（main.py所在的目录）"""
-        try:
-            # 如果当前文件被导入，使用 __file__ 获取项目根目录
-            if getattr(sys, 'frozen', False) and not tmp:
-                # print(f'(cfg)打包状态：sys.executable 是.exe的路径{sys.executable}')
-                exe_dir = os.path.dirname(sys.executable)
-                return Path(exe_dir).resolve()
-            else:
-                # print(f'(cfg)开发状态：__file__ 是当前脚本路径{__file__}')
-                return Path(__file__).parent.resolve()
-        except NameError:
-            print('(cfg)无法获取项目根目录，使用当前工作目录')
-            # 如果直接执行，使用当前工作目录
-            return Path(os.getcwd()).resolve()
-
     def write(self, key, value):  # 修复缩进：函数定义需缩进
         """向 config.json 写入/更新指定键的值（支持嵌套键）"""
         config_path = self.get_config_path()  # 需用self调用实例方法
         config = {}
-        
+        print(f'(cfg)配置文件路径：{config_path}')
         if os.path.exists(config_path):
             try:
                 with open(config_path, 'r', encoding='utf-8') as f:
@@ -94,19 +96,35 @@ class ConfigManager:
         except IOError:
             return False
 
+    def get_project_root(tmp=False):
+        """获取项目根目录（main.py所在的目录）"""
+        try:
+            # 如果当前文件被导入，使用 __file__ 获取项目根目录
+            if getattr(sys, 'frozen', False) and not tmp:
+                print(f'(cfg)打包状态：sys.executable 是.exe的路径{sys.executable}')
+                exe_dir = os.path.dirname(sys.executable)
+                return Path(exe_dir).resolve()
+            else:
+                print(f'(cfg)开发状态：__file__ 是当前脚本路径{__file__}')
+                return Path(__file__).parent.resolve()
+        except NameError:
+            print('(cfg)无法获取项目根目录，使用当前工作目录')
+            # 如果直接执行，使用当前工作目录
+            return Path(os.getcwd()).resolve()
 
 # 使用示例
 if __name__ == "__main__":
-    sk = 'UpgradeLink的SecretKey'
-    # cfg = ConfigManager()
+    # sk = 'UpgradeLink的SecretKey'
+    sk = 'dMWeukOlS_Hhfmii6-Q3Ug3H9RYIFLfi68YV8lmcxiA'
+    cfg = ConfigManager()
     # 1. 先生成密钥
-    # key = Fernet.generate_key()
+    # key = get_random_bytes(16)
     # print(f'生成的密钥：{key}')
     # 2. 用密码加密ulConf.sk
     # encrypted = cfg.encrypt_data(sk)
     # print(f'加密后的字符串：{encrypted}')
     # 3. 把加密后的字符串手动写入配置文件
     # 4. 解密测试
-    # decrypted = cfg.read('ulConf.sk')
-    # print(f'解密后的字符串：{decrypted}')
+    decrypted = cfg.read('ulConf.sk')
+    print(f'解密后的字符串：{decrypted}')
 

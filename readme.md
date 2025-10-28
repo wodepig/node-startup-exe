@@ -85,4 +85,8 @@ pyinstaller --onefile main.py --name 文件名 --noconsole    --add-data "config
 * win7下chrome打开网页时丢失css样式
 **解决办法**: 用360浏览器的极速模式打开正常. 
 
+* 打包后,双击启动报错
+**解决办法**: 检查打包环境是否正确, 检查环境是否有对应的依赖. 本地打包去掉--noconsole试试
+
+
 

@@ -64,10 +64,10 @@ class Controller:
         # 下载更新的配置
         downConf = cfg.read('downConf',{})
         if downConf.get('url','') == '':
-            self.ui.tk_input_down_url.insert(0,"http://localhost:3000")
+            self.ui.tk_input_down_url.insert(0,"文件下载地址")
         else:
             self.ui.tk_input_down_url.insert(0,downConf.get('url',''))
-        self.ui.tk_input_down_open_url.insert(0,downConf.get('openUrl',''))
+        self.ui.tk_input_down_open_url.insert(0,downConf.get('openUrl','http://localhost:3000'))
         updateTimeType = downConf.get('updateTime','每次启动时')
         updateTimeTypeList = ['每次启动时','从不']
         self.ui.tk_select_box_down_update_time.current(updateTimeTypeList.index(updateTimeType))

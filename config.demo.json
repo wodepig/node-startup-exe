@@ -4,30 +4,35 @@
         "email":"作者邮箱",
         "url":"作者个人网站"
     },
-    "updateType":"UpgradeLin,下载更新,打开网页",
-    "openConf":{
-        "url":"固定打开的网址"
+    "appConfig":{
+        "autoStart": "true/false,字符串形式.是否自动启动服务",
+        "url":"http://localhost:3000",
+        "port":3000
     },
-    "downConf":{
-        "url":"下载更新的端点",
-        "openUrl":"启动后打开的网页",
-        "updateTime":"更新时机(每次启动时/从不)"
-    },
+    "updateType":"UpgradeLin/下载更新/打开网页",
     "ulConf":{
         "ak":"UpgradeLin的ak",
         "sk":"UpgradeLin的sk",
         "fileKey":"UpgradeLin的fileKey",
         "url":"http://localhost:3000"
     },
+    "downConf":{
+        "url":"下载更新的端点",
+        "openUrl":"启动后打开的网页",
+        "updateTime":"更新时机(每次启动时/从不)"
+    },
+    "openConf":{
+        "url":"固定打开的网址"
+    },
     "appVersion":"1/2/3,UpgradeLin检查更新需要用到",
     "nodeVersion":{
-        "win7_32": "https://cdn.npmmirror.com/binaries/node/v20.19.5/node-v20.19.5-win-x64.zip",
-        "win11_64": "https://cdn.npmmirror.com/binaries/node/v20.19.5/node-v20.19.5-win-x64.zip",
-        "win8_64": "https://cdn.npmmirror.com/binaries/node/v20.19.5/node-v20.19.5-win-x64.zip"
-    },
-    "appConfig":{
-        "autoStart": "true/false,字符串形式.是否自动启动服务",
-        "url":"http://localhost:3000",
-        "port":3000
+        "win7_32": "https://nodejs.org/dist/v18.20.8/node-v18.20.8-win-x86.zip",
+        "win7_64": "https://nodejs.org/dist/v18.20.8/node-v18.20.8-win-x64.zip",
+        "win8_32": "https://cdn.npmmirror.com/binaries/node/v20.19.5/node-v20.19.5-win-x64.zip",
+        "win8_64": "https://cdn.npmmirror.com/binaries/node/v20.19.5/node-v20.19.5-win-x64.zip",
+        "win10_32": "https://cdn.npmmirror.com/binaries/node/v20.19.5/node-v20.19.5-win-x64.zip",
+        "win10_64": "https://cdn.npmmirror.com/binaries/node/v20.19.5/node-v20.19.5-win-x64.zip",
+        "win11_32": "https://cdn.npmmirror.com/binaries/node/v20.19.5/node-v20.19.5-win-x64.zip",
+        "win11_64": "https://cdn.npmmirror.com/binaries/node/v20.19.5/node-v20.19.5-win-x64.zip"
     }
 }

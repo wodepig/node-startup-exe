@@ -30,6 +30,9 @@ class ConfigManager:
 
     def decrypt_data(self,encrypted_str):
         """解密数据（输入加密后的十六进制字符串）"""
+        if not encrypted_str:
+            return encrypted_str
+
         # 转为字节
         encrypted_bytes = bytes.fromhex(encrypted_str)
         # 拆分IV（前16字节）和加密数据
@@ -45,7 +48,6 @@ class ConfigManager:
     def read(self, key, default=None):
         """从 config.json 读取指定键的值（支持嵌套键）"""
         config_path = self.get_config_path()  # 需用self调用实例方法
-        print(f'(cfg)配置文件路径：{config_path}')
         if not os.path.exists(config_path):
             return default
         
@@ -96,16 +98,16 @@ class ConfigManager:
         except IOError:
             return False
 
-    def get_project_root(tmp=False):
+    def get_project_root(self):
         """获取项目根目录（main.py所在的目录）"""
         try:
             # 如果当前文件被导入，使用 __file__ 获取项目根目录
-            if getattr(sys, 'frozen', False) and not tmp:
-                print(f'(cfg)打包状态：sys.executable 是.exe的路径{sys.executable}')
+            if getattr(sys, 'frozen', False):
+                # print(f'(cfg)打包状态：sys.executable 是.exe的路径{sys.executable}')
                 exe_dir = os.path.dirname(sys.executable)
                 return Path(exe_dir).resolve()
             else:
-                print(f'(cfg)开发状态：__file__ 是当前脚本路径{__file__}')
+                # print(f'(cfg)开发状态：__file__ 是当前脚本路径{__file__}')
                 return Path(__file__).parent.resolve()
         except NameError:
             print('(cfg)无法获取项目根目录，使用当前工作目录')
@@ -115,8 +117,8 @@ class ConfigManager:
 # 使用示例
 if __name__ == "__main__":
     # sk = 'UpgradeLink的SecretKey'
-    sk = 'dMWeukOlS_Hhfmii6-Q3Ug3H9RYIFLfi68YV8lmcxiA'
-    cfg = ConfigManager()
+    sk = '你要加密的sk'
+    # cfg = ConfigManager()
     # 1. 先生成密钥
     # key = get_random_bytes(16)
     # print(f'生成的密钥：{key}')
@@ -125,6 +127,6 @@ if __name__ == "__main__":
     # print(f'加密后的字符串：{encrypted}')
     # 3. 把加密后的字符串手动写入配置文件
     # 4. 解密测试
-    decrypted = cfg.read('ulConf.sk')
-    print(f'解密后的字符串：{decrypted}')
+    # decrypted = cfg.read('ulConf.sk')
+    # print(f'解密后的字符串：{decrypted}')
 

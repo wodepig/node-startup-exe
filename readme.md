@@ -3,7 +3,7 @@
 ![](./images/exe_02.png)
 一个由python和tkinter开发的Node程序启动器. 支持自动检查更新, 自动下载node, 并启动node服务.适合Nuxt/Next等基于Node开发的程序.理论上支持所有Node项目的运行.
 能解决客户电脑没有Node环境的使用问题. win10及以上版本建议用Tauri或Electron直接打包, 这个启动器是适配win7的.
-
+视频: https://www.bilibili.com/video/BV1tiyzBTEZ6/
 ## 运行原理
 ![](./images/code_line.png)
 1. 处理dist
